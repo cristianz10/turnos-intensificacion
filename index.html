@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnos de Intensificacion - Secundaria Bonaerense</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: #2c3e50; color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .header p { font-size: 14px; opacity: 0.9; }
+        .tabs { display: flex; background: #34495e; }
+        .tab { flex: 1; padding: 15px; text-align: center; color: white; cursor: pointer; transition: all 0.3s; border: none; font-size: 16px; }
+        .tab:hover { background: #2c3e50; }
+        .tab.active { background: white; color: #2c3e50; font-weight: bold; }
+        .content { padding: 30px; display: none; }
+        .content.active { display: block; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px; transition: border 0.3s; }
+        input:focus, select:focus { outline: none; border-color: #667eea; }
+        .btn { background: #667eea; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: bold; transition: all 0.3s; }
+        .btn:hover { background: #5568d3; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+        .btn:active { transform: translateY(0); }
+        #resultado { margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #667eea; border-radius: 5px; white-space: pre-wrap; }
+        .alert { padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        .alert-info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+        .alert-success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #667eea; color: white; }
+        tr:hover { background: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema de Turnos - Intensificacion</h1>
+            <p>Secundaria Bonaerense | Regimen Academico 2025-2026</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="cambiarTab(0)">Cargar Profesores</button>
+            <button class="tab" onclick="cambiarTab(1)">Asignar Alumno</button>
+            <button class="tab" onclick="cambiarTab(2)">Ver Horarios</button>
+        </div>
+
+        <div id="tab0" class="content active">
+            <div class="alert alert-info">
+                <strong>Paso 1:</strong> Carga los horarios disponibles de cada profesor para la intensificacion.
+            </div>
+            <form id="formProf" onsubmit="return false;">
+                <div class="form-group">
+                    <label>Nombre del Profesor</label>
+                    <input type="text" id="nombre" placeholder="Ej: Juan Perez" required>
+                </div>
+                <div class="form-group">
+                    <label>Materia</label>
+                    <input type="text" id="materia" placeholder="Ej: Matematica" required>
+                </div>
+                <div class="form-group">
+                    <label>Turno</label>
+                    <select id="turno" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Manana">Manana</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Noche">Noche</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Dia</label>
+                    <select id="dia" required>
+                        <option value="">Seleccionar...</option>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miercoles">Miercoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Horario</label>
+                    <input type="text" id="horario" placeholder="Ej: 8:00-10:00" required>
+                </div>
+                <div class="form-group">
+                    <label>Capacidad Maxima de Alumnos</label>
+                    <input type="number" id="capacidad" value="5" min="1" max="20" required>
+                </div>
+                <button type="button" class="btn" onclick="guardarProf()">Guardar Profesor</button>
+            </form>
+        </div>
+
+        <div id="tab1" class="content">
+            <div class="alert alert-info">
+                <strong>Paso 2:</strong> Ingresa los datos del alumno. El sistema asignara automaticamente turnos de forma equitativa (max. 4 previas segun reglamento).
+            </div>
+            <form id="formAlumno" onsubmit="return false;">
+                <div class="form-group">
+                    <label>DNI del Alumno</label>
+                    <input type="text" id="dniA" placeholder="Ej: 12345678" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre del Alumno</label>
+                    <input type="text" id="nombreA" placeholder="Ej: Maria Rodriguez" required>
+                </div>
+                <div class="form-group">
+                    <label>Materias Previas (separadas por comas, max 4)</label>
+                    <input type="text" id="previas" placeholder="Ej: Matematica,Lengua,Historia" required>
+                </div>
+                <button type="button" class="btn" onclick="asignarAlumno()">Asignar Turnos</button>
+            </form>
+            <div id="resultado"></div>
+        </div>
+
+        <div id="tab2" class="content">
+            <div class="alert alert-info">
+                <strong>Horarios cargados:</strong> Lista de profesores y turnos disponibles.
+            </div>
+            <div id="listaHorarios">No hay horarios cargados aun.</div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'TU_APPS_SCRIPT_URL_AQUI';  // Reemplazar con URL de Apps Script
+        let profesores = [];
+        let asignaciones = [];
+
+        function cambiarTab(index) {
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+            if(index === 2) mostrarHorarios();
+        }
+
+        async function guardarProf() {
+            const nombre = document.getElementById('nombre').value;
+            const materia = document.getElementById('materia').value;
+            const turno = document.getElementById('turno').value;
+            const dia = document.getElementById('dia').value;
+            const horario = document.getElementById('horario').value;
+            const capacidad = parseInt(document.getElementById('capacidad').value);
+
+            if(!nombre || !materia || !turno || !dia || !horario) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+
+            const prof = { nombre, materia, turno, dia, horario, capacidad, asignados: 0 };
+            profesores.push(prof);
+            
+            // Guardar en localStorage como backup
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            
+            alert('Profesor guardado exitosamente!');
+            document.getElementById('formProf').reset();
+        }
+
+        async function asignarAlumno() {
+            const dni = document.getElementById('dniA').value;
+            const nombre = document.getElementById('nombreA').value;
+            const previasInput = document.getElementById('previas').value;
+            
+            if(!dni || !nombre || !previasInput) {
+                alert('Por favor completa todos los campos');
+                return;
+            }
+
+            const previas = previasInput.split(',').map(p => p.trim()).slice(0, 4);
+            
+            if(previas.length > 4) {
+                alert('Maximo 4 materias previas segun reglamento bonaerense');
+                return;
+            }
+
+            if(profesores.length === 0) {
+                alert('Primero debes cargar profesores en la pestana 1');
+                return;
+            }
+
+            let resultados = [];
+            
+            for(let previa of previas) {
+                // Buscar profes que dicten esa materia
+                let disponibles = profesores.filter(p => 
+                    p.materia.toLowerCase().includes(previa.toLowerCase()) && 
+                    p.asignados < p.capacidad
+                );
+                
+                if(disponibles.length === 0) {
+                    resultados.push(`${previa}: ❌ No hay cupo disponible`);
+                    continue;
+                }
+                
+                // Ordenar por menos asignados (reparto equitativo)
+                disponibles.sort((a, b) => a.asignados - b.asignados);
+                const elegido = disponibles[0];
+                
+                // Actualizar contador
+                elegido.asignados++;
+                
+                // Registrar asignacion
+                asignaciones.push({
+                    dni, nombre, materia: previa,
+                    profesor: elegido.nombre,
+                    dia: elegido.dia,
+                    horario: elegido.horario,
+                    turno: elegido.turno
+                });
+                
+                resultados.push(`${previa}: ✅ ${elegido.nombre} - ${elegido.dia} ${elegido.horario} (${elegido.turno})`);
+            }
+            
+            // Guardar en localStorage
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            localStorage.setItem('asignaciones', JSON.stringify(asignaciones));
+            
+            document.getElementById('resultado').innerHTML = 
+                `<div class="alert alert-success"><strong>Asignacion completada para ${nombre}</strong></div>` +
+                resultados.join('\n');
+        }
+
+        function mostrarHorarios() {
+            if(profesores.length === 0) {
+                document.getElementById('listaHorarios').innerHTML = 'No hay horarios cargados aun.';
+                return;
+            }
+            
+            let html = '<table><tr><th>Profesor</th><th>Materia</th><th>Dia</th><th>Horario</th><th>Turno</th><th>Cupo</th></tr>';
+            profesores.forEach(p => {
+                html += `<tr><td>${p.nombre}</td><td>${p.materia}</td><td>${p.dia}</td><td>${p.horario}</td><td>${p.turno}</td><td>${p.asignados}/${p.capacidad}</td></tr>`;
+            });
+            html += '</table>';
+            document.getElementById('listaHorarios').innerHTML = html;
+        }
+
+        // Cargar datos al inicio
+        window.onload = function() {
+            const profGuardados = localStorage.getItem('profesores');
+            const asigGuardadas = localStorage.getItem('asignaciones');
+            if(profGuardados) profesores = JSON.parse(profGuardados);
+            if(asigGuardadas) asignaciones = JSON.parse(asigGuardadas);
+        };
+    </script>
+</body>
+</html>
