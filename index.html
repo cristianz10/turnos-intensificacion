@@ -106,9 +106,36 @@
                     <label>Nombre del Alumno</label>
                     <input type="text" id="nombreA" placeholder="Ej: Maria Rodriguez" required>
                 </div>
+                
+            <div class="form-group">
+                <label>Año del Alumno</label>
+                <select id="anioAlumno" required>
+                    <option value="">Seleccionar...</option>
+                    <option value="4">4to Año</option>
+                    <option value="5">5to Año</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Curso/División del Alumno</label>
+                <select id="cursoAlumno" required>
+                    <option value="">Seleccionar...</option>
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E">E</option>
+                    <option value="F">F</option>
+                </select>
+            </div>
                 <div class="form-group">
                     <label>Materias Previas (separadas por comas, max 4)</label>
-                    <input type="text" id="previas" placeholder="Ej: Matematica,Lengua,Historia" required>
+                <select id="previas" multiple size="10" required style="width:100%; height:200px; padding:8px;">
+                    <!-- Opciones cargadas dinámicamente desde datos precargados -->
+                </select>
+                <small style="color: #666; display: block; margin-top: 5px;">
+                    👉 Mantén presionado Ctrl (Windows) o Cmd (Mac) para seleccionar múltiples materias (máx 4)
+                </small>
                 </div>
                 <button type="button" class="btn" onclick="asignarAlumno()">Asignar Turnos</button>
             </form>
@@ -164,19 +191,36 @@
         async function asignarAlumno() {
             const dni = document.getElementById('dniA').value;
             const nombre = document.getElementById('nombreA').value;
-            const previasInput = document.getElementById('previas').value;
+                const anioAlumno = document.getElementById('anioAlumno').value;
+    const cursoAlumno = document.getElementById('cursoAlumno').value;
+    const selectPrevias = document.getElementById('previas');
+                const opcionesSeleccionadas = Array.from(selectPrevias.selectedOptions);
             
-            if(!dni || !nombre || !previasInput) {
+    if(!dni || !nombre || !anioAlumno || !cursoAlumno || opcionesSeleccionadas.length === 0) {
                 alert('Por favor completa todos los campos');
                 return;
             }
 
-            const previas = previasInput.split(',').map(p => p.trim()).slice(0, 4);
+                if(opcionesSeleccionadas.length > 4) {
+        alert('Máximo 4 materias previas según reglamento bonaerense');
+        return;
+    }
+
             
-            if(previas.length > 4) {
-                alert('Maximo 4 materias previas segun reglamento bonaerense');
-                return;
-            }
+    // Procesar materias seleccionadas: extraer materia, año y curso de cada opción
+    const previas = opcionesSeleccionadas.map(opt => {
+        const texto = opt.value; // Ej: "Matematica 4°A"
+        const match = texto.match(/^(.+?)\s+(\d)°([A-F])$/);
+        if(match) {
+            return {
+                texto: texto,
+                materia: match[1],
+                año: match[2],
+                curso: match[3]
+            };
+        }
+        return null;
+    }).filter(p => p !== null);}
 
             if(profesores.length === 0) {
                 alert('Primero debes cargar profesores en la pestana 1');
@@ -187,9 +231,11 @@
             
             for(let previa of previas) {
                 // Buscar profes que dicten esa materia
-                let disponibles = profesores.filter(p => 
-                    p.materia.toLowerCase().includes(previa.toLowerCase()) && 
-                    p.asignados < p.capacidad
+                        // Buscar profesores que coincidan EXACTAMENTE con materia, año y curso
+        let disponibles = profesores.filter(p => 
+            p.materia.toLowerCase() === previa.materia.toLowerCase() && 
+            p.año === previa.año &&
+                        (p.asignados || 0) < p.capacidad  // Usar 0 si asignados es undefined
                 );
                 
                 if(disponibles.length === 0) {
@@ -197,7 +243,7 @@
                     continue;
                 }
                 
-                // Ordenar por menos asignados (reparto equitativo)
+                            resultados.push(`${previa.texto}: ❌ No hay cupo disponible`);
                 disponibles.sort((a, b) => a.asignados - b.asignados);
                 const elegido = disponibles[0];
                 
@@ -213,7 +259,7 @@
                     turno: elegido.turno
                 });
                 
-                resultados.push(`${previa}: ✅ ${elegido.nombre} - ${elegido.dia} ${elegido.horario} (${elegido.turno})`);
+                        resultados.push(`${previa.texto}: ✅ ${elegido.nombre} - ${elegido.dia} ${elegido.horario} (${elegido.turno})`);
             }
             
             // Guardar en localStorage
@@ -245,6 +291,35 @@
             // TURNO MAÑANA
             {nombre: 'Rodriguez Maria', materia: 'Matematica', año: '4', curso: 'A', turno: 'Mañana', dia: 'Lunes', horario: '7:30-9:00', capacidad: 15},
             {nombre: 'Rodriguez Maria', materia: 'Matematica', año: '5', curso: 'B', turno: 'Mañana', dia: 'Lunes', horario: '9:00-10:30', capacidad: 15},
+
+            // Función para obtener lista única de materias con año y curso
+function obtenerMateriasDisponibles() {
+    const materiasUnicas = new Set();
+    profesores.forEach(p => {
+        if(p.año && p.curso) {
+            const clave = `${p.materia} ${p.año}°${p.curso}`;
+            materiasUnicas.add(clave);
+        }
+    });
+    return Array.from(materiasUnicas).sort();
+}
+
+// Función para cargar opciones del selector de materias
+function cargarSelectorMaterias() {
+    const selectMaterias = document.getElementById('previas');
+    if(!selectMaterias) return;
+    
+    const materias = obtenerMateriasDisponibles();
+    selectMaterias.innerHTML = '';
+    
+    materias.forEach(materia => {
+        const option = document.createElement('option');
+        option.value = materia;
+        option.textContent = materia;
+        selectMaterias.appendChild(option);
+    });
+}
+
             {nombre: 'Gonzalez Juan', materia: 'Lengua', año: '4', curso: 'A', turno: 'Mañana', dia: 'Lunes', horario: '7:30-9:00', capacidad: 12},
             {nombre: 'Gonzalez Juan', materia: 'Lengua', año: '5', curso: 'A', turno: 'Mañana', dia: 'Martes', horario: '7:30-9:00', capacidad: 12},
             {nombre: 'Martinez Laura', materia: 'Ingles', año: '4', curso: 'B', turno: 'Mañana', dia: 'Miercoles', horario: '9:00-10:30', capacidad: 10},
@@ -288,6 +363,15 @@
             const asigGuardadas = localStorage.getItem('asignaciones');
             if(profGuardados) profesores = JSON.parse(profGuardados);
             if(asigGuardadas) asignaciones = JSON.parse(asigGuardadas);
+                
+    // Inicializar asignados a 0 si no existe
+    profesores = profesores.map(p => ({
+        ...p,
+        asignados: p.asignados || 0
+    }));
+    
+    // Cargar opciones del selector de materias
+    cargarSelectorMaterias();
         };
     </script>
 </body>
