@@ -277,7 +277,8 @@
         ];
 
         // Cargar datos precargados solo si no hay datos guardados
-        if(!localStorage.getItem('profesores')) {
+                // FORZAR CARGA: Cambiar true por !localStorage.getItem('profesores') para cargar solo una vez
+                if(true) {
             localStorage.setItem('profesores', JSON.stringify(datosPrecargados));
         }
 // Cargar datos al inicio
