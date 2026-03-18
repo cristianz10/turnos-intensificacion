@@ -238,7 +238,49 @@
             document.getElementById('listaHorarios').innerHTML = html;
         }
 
-        // Cargar datos al inicio
+        
+        // Datos precargados de los 3 turnos
+        const datosPrecargados = [
+            // TURNO MAÑANA
+            {nombre: 'Rodriguez Maria', materia: 'Matematica', año: '4', curso: 'A', turno: 'Mañana', dia: 'Lunes', horario: '7:30-9:00', capacidad: 15},
+            {nombre: 'Rodriguez Maria', materia: 'Matematica', año: '5', curso: 'B', turno: 'Mañana', dia: 'Lunes', horario: '9:00-10:30', capacidad: 15},
+            {nombre: 'Gonzalez Juan', materia: 'Lengua', año: '4', curso: 'A', turno: 'Mañana', dia: 'Lunes', horario: '7:30-9:00', capacidad: 12},
+            {nombre: 'Gonzalez Juan', materia: 'Lengua', año: '5', curso: 'A', turno: 'Mañana', dia: 'Martes', horario: '7:30-9:00', capacidad: 12},
+            {nombre: 'Martinez Laura', materia: 'Ingles', año: '4', curso: 'B', turno: 'Mañana', dia: 'Miercoles', horario: '9:00-10:30', capacidad: 10},
+            {nombre: 'Martinez Laura', materia: 'Ingles', año: '5', curso: 'A', turno: 'Mañana', dia: 'Jueves', horario: '7:30-9:00', capacidad: 10},
+            {nombre: 'Lopez Carlos', materia: 'Historia', año: '4', curso: 'A', turno: 'Mañana', dia: 'Viernes', horario: '9:00-10:30', capacidad: 15},
+            {nombre: 'Lopez Carlos', materia: 'Historia', año: '5', curso: 'B', turno: 'Mañana', dia: 'Lunes', horario: '10:30-12:00', capacidad: 15},
+            {nombre: 'Fernandez Ana', materia: 'Biologia', año: '4', curso: 'A', turno: 'Mañana', dia: 'Martes', horario: '9:00-10:30', capacidad: 12},
+            {nombre: 'Fernandez Ana', materia: 'Biologia', año: '5', curso: 'A', turno: 'Mañana', dia: 'Miercoles', horario: '10:30-12:00', capacidad: 12},
+            // TURNO TARDE
+            {nombre: 'Perez Sofia', materia: 'Matematica', año: '4', curso: 'C', turno: 'Tarde', dia: 'Lunes', horario: '13:00-14:30', capacidad: 15},
+            {nombre: 'Perez Sofia', materia: 'Matematica', año: '5', curso: 'C', turno: 'Tarde', dia: 'Martes', horario: '13:00-14:30', capacidad: 15},
+            {nombre: 'Diaz Roberto', materia: 'Lengua', año: '4', curso: 'C', turno: 'Tarde', dia: 'Miercoles', horario: '14:30-16:00', capacidad: 12},
+            {nombre: 'Diaz Roberto', materia: 'Lengua', año: '5', curso: 'C', turno: 'Tarde', dia: 'Jueves', horario: '13:00-14:30', capacidad: 12},
+            {nombre: 'Garcia Paula', materia: 'Fisica', año: '4', curso: 'C', turno: 'Tarde', dia: 'Viernes', horario: '14:30-16:00', capacidad: 10},
+            {nombre: 'Garcia Paula', materia: 'Fisica', año: '5', curso: 'C', turno: 'Tarde', dia: 'Lunes', horario: '16:00-17:30', capacidad: 10},
+            {nombre: 'Torres Miguel', materia: 'Quimica', año: '4', curso: 'D', turno: 'Tarde', dia: 'Martes', horario: '14:30-16:00', capacidad: 10},
+            {nombre: 'Torres Miguel', materia: 'Quimica', año: '5', curso: 'D', turno: 'Tarde', dia: 'Miercoles', horario: '16:00-17:30', capacidad: 10},
+            {nombre: 'Ruiz Claudia', materia: 'Geografia', año: '4', curso: 'D', turno: 'Tarde', dia: 'Jueves', horario: '14:30-16:00', capacidad: 15},
+            {nombre: 'Ruiz Claudia', materia: 'Geografia', año: '5', curso: 'D', turno: 'Tarde', dia: 'Viernes', horario: '13:00-14:30', capacidad: 15},
+            // TURNO VESPERTINO
+            {nombre: 'Silva Daniel', materia: 'Matematica', año: '4', curso: 'E', turno: 'Vespertino', dia: 'Lunes', horario: '18:00-19:30', capacidad: 12},
+            {nombre: 'Silva Daniel', materia: 'Matematica', año: '5', curso: 'E', turno: 'Vespertino', dia: 'Martes', horario: '18:00-19:30', capacidad: 12},
+            {nombre: 'Morales Veronica', materia: 'Lengua', año: '4', curso: 'E', turno: 'Vespertino', dia: 'Miercoles', horario: '19:30-21:00', capacidad: 10},
+            {nombre: 'Morales Veronica', materia: 'Lengua', año: '5', curso: 'E', turno: 'Vespertino', dia: 'Jueves', horario: '18:00-19:30', capacidad: 10},
+            {nombre: 'Castillo Raul', materia: 'Ingles', año: '4', curso: 'E', turno: 'Vespertino', dia: 'Viernes', horario: '19:30-21:00', capacidad: 10},
+            {nombre: 'Castillo Raul', materia: 'Ingles', año: '5', curso: 'E', turno: 'Vespertino', dia: 'Lunes', horario: '21:00-22:30', capacidad: 10},
+            {nombre: 'Navarro Lucia', materia: 'Historia', año: '4', curso: 'F', turno: 'Vespertino', dia: 'Martes', horario: '19:30-21:00', capacidad: 12},
+            {nombre: 'Navarro Lucia', materia: 'Historia', año: '5', curso: 'F', turno: 'Vespertino', dia: 'Miercoles', horario: '21:00-22:30', capacidad: 12},
+            {nombre: 'Romero Javier', materia: 'Educacion Fisica', año: '4', curso: 'F', turno: 'Vespertino', dia: 'Jueves', horario: '19:30-21:00', capacidad: 20},
+            {nombre: 'Romero Javier', materia: 'Educacion Fisica', año: '5', curso: 'F', turno: 'Vespertino', dia: 'Viernes', horario: '18:00-19:30', capacidad: 20}
+        ];
+
+        // Cargar datos precargados solo si no hay datos guardados
+        if(!localStorage.getItem('profesores')) {
+            localStorage.setItem('profesores', JSON.stringify(datosPrecargados));
+        }
+// Cargar datos al inicio
         window.onload = function() {
             const profGuardados = localStorage.getItem('profesores');
             const asigGuardadas = localStorage.getItem('asignaciones');
