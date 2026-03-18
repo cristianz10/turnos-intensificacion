@@ -235,6 +235,7 @@
         let disponibles = profesores.filter(p => 
             p.materia.toLowerCase() === previa.materia.toLowerCase() && 
             p.año === previa.año &&
+                            p.curso === previa.curso &&
                         (p.asignados || 0) < p.capacidad  // Usar 0 si asignados es undefined
                 );
                 
