@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Intensificación 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --primary: #0F172A;
+            --secondary: #1E293B;
+            --accent: #3B82F6;
+            --accent-hover: #2563EB;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --bg: #F8FAFC;
+            --text: #0F172A;
+            --text-light: #64748B;
+            --border: #E2E8F0;
+            --white: #FFFFFF;
+        }
+        
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: var(--primary);
+            color: var(--white);
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.8;
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 14px 24px;
+            border: 2px solid var(--border);
+            background: var(--white);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 15px;
+            color: var(--text);
+        }
+        
+        .tab:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+        
+        .tab.active {
+            background: var(--accent);
+            color: var(--white);
+            border-color: var(--accent);
+        }
+        
+        .content {
+            display: none;
+            background: var(--white);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .content.active { display: block; }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--white);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+        
+        .btn-danger:hover {
+            background: #DC2626;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+        
+        th {
+            background: var(--bg);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+        }
+        
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        tr:hover {
+            background: var(--bg);
+        }
+        
+        .alert {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        
+        .alert-info {
+            background: #DBEAFE;
+            border-color: var(--accent);
+            color: #1E40AF;
+        }
+        
+        .alert-success {
+            background: #D1FAE5;
+            border-color: var(--success);
+            color: #065F46;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            padding-left: 44px;
+        }
+        
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .badge-mañana {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+        
+        .badge-tarde {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        .badge-vespertino {
+            background: #E0E7FF;
+            color: #3730A3;
+        }
+        
+        .profesor-card {
+            background: var(--white);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .profesor-card:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        
+        .profesor-card.selected {
+            border-color: var(--accent);
+            background: #EFF6FF;
+        }
+        
+        .profesor-nombre {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+        
+        .profesor-info {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filters select {
+            width: auto;
+            min-width: 180px;
+        }
+        
+        .alumno-card {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .alumno-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .alumno-nombre {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Sistema de Intensificación 2026</h1>
+            <p>Secundaria Bonaerense | 530 horarios cargados desde Excel</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="cambiarTab(0)">Asignar Alumno</button>
+            <button class="tab" onclick="cambiarTab(1)">Gestionar Alumnos</button>
+            <button class="tab" onclick="cambiarTab(2)">Buscar Horarios</button>
+            <button class="tab" onclick="cambiarTab(3)">Base de Profesores</button>
+            <button class="tab" onclick="cambiarTab(4)">Estadísticas</button>
+        </div>
+
+        <div id="tab0" class="content active">
+            <div class="alert alert-info">
+                <strong>📋 Asignación:</strong> Selecciona año y turno, luego elige la materia para ver todos los horarios disponibles.
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="statAlumnos">0</div>
+                    <div class="stat-label">Alumnos Asignados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">107</div>
+                    <div class="stat-label">Profesores</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">530</div>
+                    <div class="stat-label">Horarios</div>
+                </div>
+            </div>
+
+            <form id="formAsignar" onsubmit="asignarAlumno(event)">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>DNI del Alumno</label>
+                        <input type="text" id="dniAlumno" placeholder="12345678" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre del Alumno</label>
+                        <input type="text" id="nombreAlumno" placeholder="Juan Pérez" required>
+                    </div>
+                </div>
+                
+                <div class="grid-3">
+                    <div class="form-group">
+                        <label>Año</label>
+                        <select id="anioAlumno" required onchange="actualizarMaterias()">
+                            <option value="">Seleccionar...</option>
+                            <option value="1">1° Año</option>
+                            <option value="2">2° Año</option>
+                            <option value="3">3° Año</option>
+                            <option value="4">4° Año</option>
+                            <option value="5">5° Año</option>
+                            <option value="6">6° Año</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Turno</label>
+                        <select id="turnoAlumno" required onchange="actualizarMaterias()">
+                            <option value="">Seleccionar...</option>
+                            <option value="Mañana">Mañana</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Vespertino">Vespertino</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>División</label>
+                        <select id="divisionAlumno" required>
+                            <option value="">Seleccionar...</option>
+                            <option value="1">1°</option>
+                            <option value="2">2°</option>
+                            <option value="3">3°</option>
+                            <option value="4">4°</option>
+                            <option value="5">5°</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Materia a Intensificar</label>
+                    <select id="materiaAlumno" required onchange="mostrarHorariosDisponibles()">
+                        <option value="">Primero selecciona año y turno...</option>
+                    </select>
+                </div>
+                
+                <div id="horariosDisponibles" style="display:none; margin-top:20px;">
+                    <h3 style="margin-bottom:16px;">Horarios Disponibles (Click para seleccionar):</h3>
+                    <div id="listaHorarios"></div>
+                </div>
+                
+                <div id="horarioSeleccionado" style="display:none; margin-top:20px;">
+                    <div class="alert alert-success">
+                        <strong>✓ Horario seleccionado:</strong> <span id="infoHorarioSeleccionado"></span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top:20px;">
+                    Asignar Alumno
+                </button>
+            </form>
+        </div>
+
+        <div id="tab1" class="content">
+            <div class="search-box">
+                <input type="text" id="buscarAlumno" placeholder="Buscar por nombre o DNI..." onkeyup="filtrarAlumnos()">
+            </div>
+            <div id="listaAlumnos"></div>
+        </div>
+
+        <div id="tab2" class="content">
+            <div class="alert alert-info">
+                <strong>🔍 Búsqueda:</strong> Filtra horarios por profesor, materia, año o turno.
+            </div>
+            
+            <div class="filters">
+                <select id="filtroProfesor" onchange="filtrarHorarios()">
+                    <option value="">Todos los profesores</option>
+                </select>
+                <select id="filtroMateria" onchange="filtrarHorarios()">
+                    <option value="">Todas las materias</option>
+                </select>
+                <select id="filtroAnio" onchange="filtrarHorarios()">
+                    <option value="">Todos los años</option>
+                    <option value="1">1° Año</option>
+                    <option value="2">2° Año</option>
+                    <option value="3">3° Año</option>
+                    <option value="4">4° Año</option>
+                    <option value="5">5° Año</option>
+                    <option value="6">6° Año</option>
+                </select>
+                <select id="filtroTurno" onchange="filtrarHorarios()">
+                    <option value="">Todos los turnos</option>
+                    <option value="Mañana">Mañana</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Vespertino">Vespertino</option>
+                </select>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Profesor</th>
+                            <th>Materia</th>
+                            <th>Curso</th>
+                            <th>Turno</th>
+                            <th>Día</th>
+                            <th>Horario</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHorarios"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab3" class="content">
+            <div class="alert alert-info">
+                <strong>👨‍🏫 Base de Datos:</strong> 107 profesores con 530 horarios cargados desde Excel.
+            </div>
+            <div class="search-box">
+                <input type="text" id="buscarProfesor" placeholder="Buscar profesor..." onkeyup="filtrarProfesores()">
+            </div>
+            <div id="listaProfesores"></div>
+        </div>
+
+        <div id="tab4" class="content">
+            <h2 style="margin-bottom:24px;">Estadísticas del Sistema</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="statMaterias">0</div>
+                    <div class="stat-label">Materias Diferentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statCursos">0</div>
+                    <div class="stat-label">Cursos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statDias">5</div>
+                    <div class="stat-label">Días</div>
+                </div>
+            </div>
+            <h3 style="margin:32px 0 16px 0;">Top 10 Profesores con Más Horarios</h3>
+            <div id="topProfesores"></div>
+        </div>
+    </div>
+
+    <script>
+        const PROFESORES_DB = [{"nombre": "ACOSTA HECTOR", "materia": "POLITICA Y CIUDADANIA", "codigo": "PYC", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "ACOSTA HECTOR", "materia": "POLITICA Y CIUDADANIA", "codigo": "PYC", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "ALBERT SILVIO", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "ALBERT SILVIO", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "ALBERT SILVIO", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "VIERNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "ALBERT SILVIO", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "VIERNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "ALLEGUE ANA MARIA", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "ALLEGUE ANA MARIA", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "ALVARES SANDRA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "ALVARES SANDRA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "LUNES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "ALVARES SANDRA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "ALVARES SANDRA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "ALVARES SANDRA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "ALVARES SANDRA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "ALVARES SANDRA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "ALVARES SANDRA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "VIERNES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MARTES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MARTES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "MARTES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "AQUINO MABEL", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "VIERNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "AREBALO LUIS", "materia": "GESTION ORGANIZACIONAL", "codigo": "GOR", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "AREBALO LUIS", "materia": "ELEM. DE MICRO-MACRO ECO.", "codigo": "EMM", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MARTES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "AREBALO LUIS", "materia": "GESTION ORGANIZACIONAL", "codigo": "GOR", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "AREBALO LUIS", "materia": "ELEM. DE MICRO-MACRO ECO.", "codigo": "EMM", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MIERCOLES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "AREBALO LUIS", "materia": "SIS. DE INFOR. CONTABLE I", "codigo": "SIC", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "LUNES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "AREBALO LUIS", "materia": "SIS. DE INFOR. CONTABLE I", "codigo": "SIC", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "LUNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "AUGUSTO ADRIANA", "materia": "INGLES", "codigo": "IGS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "AUGUSTO ADRIANA", "materia": "INGLES", "codigo": "IGS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFÍA", "codigo": "GGF", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "MARTES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MARTES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BAEZ ISABEL", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BAIO CLAUDIA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "LUNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "BAIO CLAUDIA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "LUNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "BAIO CLAUDIA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "BAIO CLAUDIA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "BELINI ANDREA", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "VIERNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "BELINI ANDREA", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "VIERNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "BELINI ANDREA", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "BELINI ANDREA", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BELINI ANDREA", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BELINI ANDREA", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MIERCOLES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "BELINI ANDREA", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BELINI ANDREA", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "MARTES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "JUEVES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "MARTES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "BELMONTE SILVIA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "MARTES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "BENITEZ DORA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BENITEZ DORA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BENITEZ DORA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BENITEZ DORA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BENITEZ DORA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "BENITEZ DORA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "BENITEZ DORA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "BENITEZ DORA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "LUNES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "MIERCOLES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "JUEVES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "JUEVES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BERMEJO ELEONORA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "JUEVES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BERTINAT ELISABETH", "materia": "FILO. E HISTORIA DE LA CIEN. Y TEC.", "codigo": "FCT", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "MARTES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BERTINAT ELISABETH", "materia": "FILO. E HISTORIA DE LA CIEN. Y TEC.", "codigo": "FCT", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BLANCO ADRIAN", "materia": "FILOSOFIA", "codigo": "FIA", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "BLANCO ADRIAN", "materia": "FILOSOFIA", "codigo": "FIA", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "VIERNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "VIERNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MARTES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BRANDAN NATALIA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BRITOS MARIANA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "MARTES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "BRITOS MARIANA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "MARTES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "BRUNETTI ANDREA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "BRUNETTI ANDREA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "BRUNETTI ANDREA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BRUNETTI ANDREA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BUCHET CARINA", "materia": "EDUC. ARTIS. PLASTICA", "codigo": "APV", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "LUNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "BUCHET CARINA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "LUNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "BUCHET CARINA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "BUCHET CARINA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "BUYUTTI JULIO", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "VIERNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "BUYUTTI JULIO", "materia": "HISTORIA", "codigo": "HTR", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "VIERNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MARTES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "CALDAROLA ROMINA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CALLE FERNANDA", "materia": "INGLES", "codigo": "IGS", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "MARTES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "CALLE FERNANDA", "materia": "INGLES", "codigo": "IGS", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "MARTES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "CANDI MARCELA", "materia": "CIENCIAS DE LA TIERRA", "codigo": "CDT", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "CANDI MARCELA", "materia": "CIENCIAS DE LA TIERRA", "codigo": "CDT", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "CANDI MARCELA", "materia": "CIENCIAS DE LA TIERRA", "codigo": "CDT", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "CANDI MARCELA", "materia": "CIENCIAS DE LA TIERRA", "codigo": "CDT", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "CANTERO SILVIA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "CANTERO SILVIA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "LUNES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "MARTES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "CARABAJAL MARCELA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "JUEVES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "CARAVALLO JOHANA", "materia": "ELEM. DE MICRO-MACRO ECONOMIA", "codigo": "EMM", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "CARAVALLO JOHANA", "materia": "ELEM. DE MICRO-MACRO ECONOMIA", "codigo": "EMM", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "VIERNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "CARDOZO ZULEMA", "materia": "HISTORIA", "codigo": "HTR", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CARDOZO ZULEMA", "materia": "HISTORIA", "codigo": "HTR", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CARDOZO ZULEMA", "materia": "HISTORIA", "codigo": "HTR", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "CARDOZO ZULEMA", "materia": "HISTORIA", "codigo": "HTR", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "CARDOZO ZULEMA", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "VIERNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "CARDOZO ZULEMA", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "VIERNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "CARDOZO ZULEMA", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "CARDOZO ZULEMA", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "BIOLOGIA, GENETICA Y SOCIEDAD", "codigo": "BGS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "JUEVES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "AMBIENTE DESAR. Y SOCIEDAD", "codigo": "ADS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "AMBIENTE DESAR. Y SOCIEDAD", "codigo": "ADS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "BIOLOGIA GENET. Y SOCIEDAD", "codigo": "BGS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "CATANIA EMILCE", "materia": "BIOLOGIA GENETICA Y SOCIEDAD", "codigo": "BGS", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "VIERNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "CIUFIA MARIELA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "VIERNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "CONTRERA FERNANDO", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MARTES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "CONTRERA FERNANDO", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MARTES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "CONTRERA FERNANDO", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "CONTRERA FERNANDO", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "COSI DARIO", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "COSI DARIO", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MARTES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "COSI DARIO", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "VIERNES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "COSI DARIO", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "COSI DARIO", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "DEL PINO EDITH", "materia": "TRABAJO Y CIUDADANIA", "codigo": "TYC", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "DEL PINO EDITH", "materia": "TRABAJO Y CIUDADANIA", "codigo": "TYC", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "DEL PINO EDITH", "materia": "TRABAJO Y CIUDADANIA", "codigo": "TYC", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "DEL PINO EDITH", "materia": "TRABAJO Y CIUDADANIA", "codigo": "TYC", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "MARTES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "DERIARD DARIO", "materia": "NUE. TEC. DE LA INF. Y LA CONEC", "codigo": "NTI", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "DERIARD DARIO", "materia": "NUE. TEC. DE LA INF. Y LA CONEC", "codigo": "NTI", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "DI BONA JULIETA", "materia": "QUIMICA DEL CARBONO", "codigo": "QDC", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "DI BONA JULIETA", "materia": "QUIMICA DEL CARBONO", "codigo": "QDC", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "VIERNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "DI BONA JULIETA", "materia": "QUIMICA DEL CARBONO", "codigo": "QDC", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "VIERNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "DI BONA JULIETA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "JUEVES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "DI BONA JULIETA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "JUEVES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "DI BONA JULIETA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "DI BONA JULIETA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "DI MEGLIO SABRINA", "materia": "ELEM DE MICRO Y MACRO ECONOMIA", "codigo": "EMM", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "LUNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "DI MEGLIO SABRINA", "materia": "ELEM DE MICRO Y MACRO ECONOMIA", "codigo": "EMM", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "LUNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "DIAZ BARBARA", "materia": "HISTORIA", "codigo": "HTR", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "DIAZ BARBARA", "materia": "HISTORIA", "codigo": "HTR", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "DUETE FABIANA", "materia": "SIS. DE INFORM. CONTABLE", "codigo": "SIC", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "LUNES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "DUETE FABIANA", "materia": "SIS. DE INFORM. CONTABLE", "codigo": "SIC", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "DUETE FABIANA", "materia": "SIS. DE INFORM. CONTABLE", "codigo": "SIC", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "DUETE FABIANA", "materia": "SIS. DE INFORM. CONTABLE", "codigo": "SIC", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "VIERNES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "ENCINA MARIANA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "ENCINA MARIANA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "LUNES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "FARIAS JULIANA", "materia": "INTRODUCCION A LA QUIMICA", "codigo": "IAQ", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ FLORENCIA", "materia": "INGLES", "codigo": "IGS", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ FLORENCIA", "materia": "INGLES", "codigo": "IGS", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ FLORENCIA", "materia": "INGLES", "codigo": "IGS", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "LUNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ FLORENCIA", "materia": "INGLES", "codigo": "IGS", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "LUNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "LUNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "LUNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "GESTION ORGANIZACIONAL", "codigo": "GOR", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "JUEVES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "FERNANDEZ MONICA", "materia": "GESTION ORGANIZACIONAL", "codigo": "GOR", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "JUEVES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "FERREYRA CAROLINA", "materia": "BIOLOGIA", "codigo": "BGL", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "LUNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "FERREYRA CAROLINA", "materia": "BIOLOGIA", "codigo": "BGL", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "LUNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "FLORIACH AYELEN", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "JUEVES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "FLORIACH AYELEN", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "JUEVES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "FLORIACH AYELEN", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "JUEVES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "FLORIACH AYELEN", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "JUEVES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "FLORIACH AYELEN", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "VIERNES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "FLORIACH AYELEN", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "VIERNES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "FLORIACH AYELEN", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "VIERNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "FLORIACH AYELEN", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "VIERNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "FOTI MARIA SOLEDAD", "materia": "INGLES", "codigo": "IGS", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "FOTI MARIA SOLEDAD", "materia": "INGLES", "codigo": "IGS", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "FOTI MARIA SOLEDAD", "materia": "INGLES", "codigo": "IGS", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "FOTI MARIA SOLEDAD", "materia": "INGLES", "codigo": "IGS", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "FOTI SOLEDAD", "materia": "INGLES", "codigo": "IGS", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "MARTES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "FOTI SOLEDAD", "materia": "INGLES", "codigo": "IGS", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "FOTI SOLEDAD", "materia": "INGLES", "codigo": "IGS", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "FOTI SOLEDAD", "materia": "INGLES", "codigo": "IGS", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "MARTES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "FRANCO EMILCE", "materia": "ED. ARTISTICA  MUSICA", "codigo": "AMC", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "FRANCO EMILCE", "materia": "ED. ARTISTICA  MUSICA", "codigo": "AMC", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "GODOY FRANCISCA", "materia": "SIS. DE INF. CONTABLE II", "codigo": "SIC", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "GODOY FRANCISCA", "materia": "SIS. DE INF. CONTABLE II", "codigo": "SIC", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "GODOY FRANCISCA", "materia": "SIS. DE INF. CONTABLE II", "codigo": "SIC", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "GODOY FRANCISCA", "materia": "SIS. DE INF. CONTABLE II", "codigo": "SIC", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "GRANDI ANAHI", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "GRANDI ANAHI", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "GRANDI ANAHI", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "GRANDI ANAHI", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "GUERRA ROXANA", "materia": "ED. ARTISTICA DANZA", "codigo": "ADZ", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "JUEVES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "GUERRA ROXANA", "materia": "ED. ARTISTICA DANZA", "codigo": "ADZ", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "JUEVES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "HEREDIA BLANCA PAOLA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "LUNES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "HEREDIA BLANCA PAOLA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "LUNES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "HEREDIA PAOLA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "HEREDIA PAOLA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "HEREDIA PAOLA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "HEREDIA PAOLA", "materia": "FISICO QUIMICA", "codigo": "FQA", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "HEREDIA PAOLA", "materia": "INTRUDUCCION A LA FISICA", "codigo": "IAF", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "HEREDIA PAOLA", "materia": "INTRUDUCCION A LA FISICA", "codigo": "IAF", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "INCANDONA MARIANA", "materia": "BIOLOGIA", "codigo": "BGL", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "VIERNES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "INCANDONA MARIANA", "materia": "BIOLOGIA", "codigo": "BGL", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "VIERNES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "BIO. GENETICA Y SOCIEDAD", "codigo": "BGS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "BIO. GENETICA Y SOCIEDAD", "codigo": "BGS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "VIERNES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "BIO. GENETICA Y SOCIEDAD", "codigo": "BGS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "MARTES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "BIOLOGÍA", "codigo": "BLG", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "JUEVES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "INCARDONA MARIANA", "materia": "BIOLOGÍA", "codigo": "BLG", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "JUEVES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "JUAREZ MARTINEZ ANAHI", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "LUNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "JUAREZ MARTINEZ ANAHI", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "LUNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "JUAREZ MARTINEZ ANAHI", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "MARTES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "JUAREZ MARTINEZ ANAHI", "materia": "CIENCIAS NATURALES", "codigo": "CNT", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "MARTES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "KUBILIUNAS DANIEL", "materia": "ED. ARTISTICA MUSICA", "codigo": "AMC", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "KUBILIUNAS DANIEL", "materia": "ED. ARTISTICA MUSICA", "codigo": "AMC", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "LEGUIZA IVAN", "materia": "POLITICA Y CIUDADANIA", "codigo": "PYC", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "LEGUIZA IVAN", "materia": "POLITICA Y CIUDADANIA", "codigo": "PYC", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "LEGUIZAMON ROBERTO", "materia": "POLITICA Y CIUDADANIA", "codigo": "PYC", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "LUNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "LEGUIZAMON ROBERTO", "materia": "POLITICA Y CIUDADANIA", "codigo": "PYC", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "LUNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "LEGUIZAMON ROBERTO", "materia": "POLITICA Y CIUDADANIA", "codigo": "PYC", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "LEGUIZAMON ROBERTO", "materia": "POLITICA Y CIUDADANIA", "codigo": "PYC", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "MACEDO VANESA", "materia": "NUE. TEC. DE LA INF. Y LA CONEC", "codigo": "NTI", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "MACEDO VANESA", "materia": "NUE. TEC. DE LA INF. Y LA CONEC", "codigo": "NTI", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "MACRI GABRIELA", "materia": "DERECHO", "codigo": "DER", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MARTES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "MACRI GABRIELA", "materia": "DERECHO", "codigo": "DER", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MARTES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "MANSILLA LORENA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "MANSILLA LORENA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "MIERCOLES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "MANSILLA LORENA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "MANSILLA LORENA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "MARTIN JOSE", "materia": "FISICA CLASICA Y MODERNA", "codigo": "FCM", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "MARTES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "MARTIN JOSE", "materia": "FISICA CLASICA Y MODERNA", "codigo": "FCM", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "MARTIN JOSE", "materia": "FISICA CLASICA Y MODERNA", "codigo": "FCM", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "MARTIN JOSE", "materia": "FISICA CLASICA Y MODERNA", "codigo": "FCM", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "MARTIN JOSE", "materia": "FISICA CLASICA Y MODERNA", "codigo": "FCM", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "MARTIN JOSE", "materia": "FISICA CLASICA Y MODERNA", "codigo": "FCM", "anio": "6", "division": "3", "curso": "63", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "MARTIN JOSE LUIS", "materia": "GESTION ORGANIZACIONAL", "codigo": "GOR", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "MARTES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "MARTIN JOSE LUIS", "materia": "GESTION ORGANIZACIONAL", "codigo": "GOR", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "JUEVES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "MEDINA ALDO", "materia": "TRABAJO Y CIUDADANIA", "codigo": "TYC", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "LUNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "MEDINA ALDO", "materia": "TRABAJO Y CIUDADANIA", "codigo": "TYC", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "LUNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "MICHL AGUSTINA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "MICHL AGUSTINA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MARTES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "MICHL AGUSTINA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "MARTES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "MICHL AGUSTINA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "JUEVES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "MIRANDA JANINA", "materia": "AMB. DESARRO. Y SOCIEDAD", "codigo": "ADS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "MIRANDA JANINA", "materia": "AMB. DESARRO. Y SOCIEDAD", "codigo": "ADS", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "MIRCEA FERNANDO", "materia": "TRABAJO Y CIUDADANIA", "codigo": "TYC", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "MIRCEA FERNANDO", "materia": "TRABAJO Y CIUDADANIA", "codigo": "TYC", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "MORALES DANIELA", "materia": "FILOSOFIA", "codigo": "FIA", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "MARTES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "MORALES DANIELA", "materia": "FILOSOFIA", "codigo": "FIA", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "MARTES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "MORALES DANIELA", "materia": "FILOSOFIA", "codigo": "FIA", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "MORALES DANIELA", "materia": "FILOSOFIA", "codigo": "FIA", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "MORBELLI MARCELA", "materia": "DERECHO", "codigo": "DER", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "MORBELLI MARCELA", "materia": "DERECHO", "codigo": "DER", "anio": "5", "division": "2", "curso": "52", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "MORETTI SEBASTIAN", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MARTES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "MORETTI SEBASTIAN", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "MORETTI SEBASTIAN", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "MOYANO OSCAR", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "JUEVES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "MOYANO OSCAR", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "JUEVES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "MOYANO OSCAR", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "VIERNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "MUÑOZ RAMONA HIPOLITA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "MUÑOZ RAMONA HIPOLITA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "MUÑOZ RAMONA HIPOLITA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "VIERNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "MUÑOZ RAMONA HIPOLITA", "materia": "PRACTICAS DEL LENGUAJE", "codigo": "PLG", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "VIERNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "NOGUERA MONICA", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "JUEVES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "NOGUERA MONICA", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "JUEVES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "NOGUERA MONICA", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "JUEVES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "NUÑEZ LUIS", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "NUÑEZ LUIS", "materia": "CONTRUCCION DE CIUDADANIA", "codigo": "CCD", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "OBREGON ELIAS", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "OBREGON ELIAS", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "OBREGON ELIAS", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "OVELAR HECTOR", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "OVELAR HECTOR", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "OVELAR HECTOR", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "OVELAR HECTOR", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "OVELAR HECTOR", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "JUEVES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "OVELAR HECTOR", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "4", "curso": "14", "turno": "Tarde", "dia": "JUEVES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "OVELAR HECTOR", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "OVELAR HECTOR", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "PANIAGUA NATALIA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "PANIAGUA NATALIA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "PANIAGUA NATALIA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "PANIAGUA NATALIA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "PANIAGUA NATALIA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "VIERNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "PANIAGUA NATALIA", "materia": "GEOGRAFIA", "codigo": "GGF", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "VIERNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "PAREDES ROBERTO", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "PAREDES ROBERTO", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "PAREDES ROBERTO", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "VIERNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "PAREDES ROBERTO", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "VIERNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "PAREDES ROBERTO", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "LUNES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "PAREDES ROBERTO", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "LUNES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "PAREDES ROBERTO", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "JUEVES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "PAREDES ROBERTO", "materia": "CIENCIAS SOCIALES", "codigo": "CSC", "anio": "1", "division": "5", "curso": "15", "turno": "Vespertino", "dia": "JUEVES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "PASTOR NATALIA", "materia": "INGLES", "codigo": "IGS", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "VIERNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "PASTOR NATALIA", "materia": "INGLES", "codigo": "IGS", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "VIERNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "PERALTA SILVINA", "materia": "INGLES", "codigo": "IGS", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "LUNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "PERALTA SILVINA", "materia": "INGLES", "codigo": "IGS", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "LUNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "PEREYRA MERCEDES", "materia": "TEORIA DE LAS ORGANIZACIONES", "codigo": "TDO", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "LUNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "PEREYRA MERCEDES", "materia": "TEORIA DE LAS ORGANIZACIONES", "codigo": "TDO", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "LUNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "PEREYRA MERCEDES", "materia": "TEORIA DE LAS ORGANIZACIONES", "codigo": "TDO", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "MARTES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "PEREYRA MERCEDES", "materia": "TEORIA DE LAS ORGANIZACIONES", "codigo": "TDO", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "MARTES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "PEREYRA MERCEDES", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "PEREYRA MERCEDES", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "VIERNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "PEREYRA MERCEDES", "materia": "ECONOMIA POLITICA", "codigo": "EPO", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "VIERNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "PITRELLA ALEJANDRO", "materia": "INGLES", "codigo": "IGS", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "PITRELLA ALEJANDRO", "materia": "INGLES", "codigo": "IGS", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "PITRELLA ALEJANDRO", "materia": "INGLES", "codigo": "IGS", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "PITRELLA ALEJANDRO", "materia": "INGLES", "codigo": "IGS", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "PITRELLA ALEJANDRO", "materia": "INGLES", "codigo": "IGS", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "PITRELLA ALEJANDRO", "materia": "INGLES", "codigo": "IGS", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "PONCE SILVIA", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "JUEVES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "PONCE SILVIA", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "JUEVES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "PONCE SILVIA", "materia": "HISTORIA", "codigo": "HTR", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "JUEVES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "PONCE SILVIA", "materia": "HISTORIA", "codigo": "HTR", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "JUEVES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "RAMOS NATALIA", "materia": "INGLES", "codigo": "IGS", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "RAMOS NATALIA", "materia": "INGLES", "codigo": "IGS", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "RIEDEL MARIELA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "RIEDEL MARIELA", "materia": "CONTRUCCION CIUDADANA", "codigo": "CCD", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "RIEDEL MARIELA", "materia": "HISTORIA", "codigo": "HTR", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "VIERNES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "RIEDEL MARIELA", "materia": "HISTORIA", "codigo": "HTR", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "VIERNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "RIOS HECTOR", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "RIOS HECTOR", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "RIOS HECTOR", "materia": "BIOLOGIA", "codigo": "BGL", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "JUEVES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "RIOS HECTOR", "materia": "BIOLOGIA", "codigo": "BGL", "anio": "2", "division": "4", "curso": "24", "turno": "Tarde", "dia": "JUEVES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MIERCOLES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "JUEVES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "JUEVES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "BIOLOGÍA", "codigo": "BLG", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "VIERNES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "SALUD Y ADOLESCENCIA", "codigo": "SYA", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "SALUD Y ADOLESCENCIA", "codigo": "SYA", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "SALUD Y ADOLESCENCIA", "codigo": "SYA", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "RIVERA CAROLINA", "materia": "SALUD Y ADOLESCENCIA", "codigo": "SYA", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "ROCCHIO MARISA", "materia": "PROYECTO ORGANIZACIONAL", "codigo": "PRO", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "ROCCHIO MARISA", "materia": "PROYECTO ORGANIZACIONAL", "codigo": "PRO", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "ROCCHIO MARISA", "materia": "PROYECTO ORGANIZACIONAL", "codigo": "PRO", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "ROCCHIO MARISA", "materia": "PROYECTO ORGANIZACIONAL", "codigo": "PRO", "anio": "6", "division": "2", "curso": "62", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "ROCCHIO MARISA", "materia": "PROYECTO ORGANIZACIONAL", "codigo": "PRO", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "LUNES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "ROCCHIO MARISA", "materia": "PROYECTO ORGANIZACIONAL", "codigo": "PRO", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "LUNES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "ROCCHIO MARISA", "materia": "PROYECTO ORGANIZACIONAL", "codigo": "PRO", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "VIERNES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "ROCCHIO MARISA", "materia": "PROYECTO ORGANIZACIONAL", "codigo": "PRO", "anio": "6", "division": "1", "curso": "61", "turno": "Vespertino", "dia": "VIERNES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "RODRIGUEZ CINTIA IRIS", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "RODRIGUEZ CINTIA IRIS", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "VIERNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "RODRIGUEZ CINTIA IRIS", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "VIERNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "ROTKEGEL ROMINA", "materia": "INGLES", "codigo": "IGS", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "ROTKEGEL ROMINA", "materia": "INGLES", "codigo": "IGS", "anio": "2", "division": "5", "curso": "25", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "SALAZAR VANESA", "materia": "SISTEMA. DE INF. CONTABLE", "codigo": "", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "LUNES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "SALAZAR VANESA", "materia": "SISTEMA. DE INF. CONTABLE", "codigo": "", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "JUEVES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "SALAZAR VANESA", "materia": "SISTEMA. DE INF. CONTABLE", "codigo": "", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "JUEVES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "SALAZAR VANESA", "materia": "SISTEMA. DE INF. CONTABLE", "codigo": "", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "VIERNES", "horario": "19.20 a 20.20", "capacidad": 15, "asignados": 0}, {"nombre": "SALTIRANA BARBARA", "materia": "NUE. TEC. DE LA INF. Y LA CONEC", "codigo": "NTI", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "SALTIRANA BARBARA", "materia": "NUE. TEC. DE LA INF. Y LA CONEC", "codigo": "NTI", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MIERCOLES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "SARDA CARLOS", "materia": "NUE. TEC. DE LA INF. Y LA CONEC", "codigo": "NTI", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "SARDA CARLOS", "materia": "NUE. TEC. DE LA INF. Y LA CONEC", "codigo": "NTI", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "SOLER ADRIANA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "VIERNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "SOLER ADRIANA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "2", "division": "1", "curso": "21", "turno": "Mañana", "dia": "VIERNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "SOLORES MARIANO", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "MIERCOLES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "SOLORES MARIANO", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "MIERCOLES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "SOLORES MARIANO", "materia": "LITERATURA", "codigo": "LIT", "anio": "4", "division": "5", "curso": "45", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "SOLORES MARIANO", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "MARTES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "SOLORES MARIANO", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "JUEVES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "SOLORES MARIANO", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "4", "curso": "64", "turno": "Tarde", "dia": "JUEVES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "SOSA ALFREDO", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "SOSA ALFREDO", "materia": "HISTORIA", "codigo": "HTR", "anio": "2", "division": "2", "curso": "22", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "STEINER AXEL", "materia": "ED. ARTISTICA MUSICA", "codigo": "AMC", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "JUEVES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "STEINER AXEL", "materia": "ED. ARTISTICA MUSICA", "codigo": "AMC", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "JUEVES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "SURMAJ WALTER", "materia": "DERECHO", "codigo": "DER", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "SURMAJ WALTER", "materia": "DERECHO", "codigo": "DER", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "JUEVES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "TIRINATO MARIELA", "materia": "INTRODUCCIÓN A LA FÍSICA", "codigo": "IAF", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "TIRINATO MARIELA", "materia": "INTRODUCCIÓN A AL FÍSICA", "codigo": "IAF", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "TIRINATO MARIELA", "materia": "FISICA", "codigo": "FIS", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "VIERNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "TIRINATO MARIELA", "materia": "FISICA", "codigo": "FIS", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "VIERNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "TIRINATO MARIELA", "materia": "FISICA", "codigo": "FIS", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "VIERNES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "TIRINATO MARIELA", "materia": "INTRODUCCION A LA FISICA", "codigo": "IAF", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "MARTES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "TIRINATO MARIELA", "materia": "INTRODUCCION A LA FISICA", "codigo": "IAF", "anio": "4", "division": "1", "curso": "41", "turno": "Vespertino", "dia": "MARTES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "LUNES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "LUNES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA", "materia": "MATEMATICA CICLO SUPERIOR", "codigo": "MCS", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "MIERCOLES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA ANGELICA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA ANGELICA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA ANGELICA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA ANGELICA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA ANGELICA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA ANGELICA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "3", "curso": "13", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA ANGELICA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "MIERCOLES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "TRINIDAD MARIA ANGELICA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "2", "division": "3", "curso": "23", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "URDICIAN AGUSTIN", "materia": "ED. ARTISTICA MUSICA", "codigo": "AMC", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "URDICIAN AGUSTIN", "materia": "ED. ARTISTICA MUSICA", "codigo": "AMC", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "URDICIAN AGUSTIN", "materia": "ED. ARTISTICA MUSICA", "codigo": "AMC", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "LUNES", "horario": "20.20 a 21.20", "capacidad": 15, "asignados": 0}, {"nombre": "URDICIAN AGUSTIN", "materia": "ED. ARTISTICA MUSICA", "codigo": "AMC", "anio": "3", "division": "5", "curso": "35", "turno": "Vespertino", "dia": "LUNES", "horario": "21.30 a 22.30", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "LUNES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "6", "division": "5", "curso": "65", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MARTES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "3", "curso": "53", "turno": "Mañana", "dia": "MARTES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "5", "curso": "55", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "MIERCOLES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "4", "curso": "54", "turno": "Tarde", "dia": "MIERCOLES", "horario": "17.20 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "VIERNES", "horario": "17.30 a 18.20", "capacidad": 15, "asignados": 0}, {"nombre": "VALDEBENITO CLAUDIA", "materia": "LITERATURA", "codigo": "LIT", "anio": "5", "division": "1", "curso": "51", "turno": "Vespertino", "dia": "VIERNES", "horario": "18.20 a 19.10", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS SILVIA", "materia": "SIS. DE INFOR. CONTABLE", "codigo": "SIC", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "JUEVES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS SILVIA", "materia": "SIS. DE INFOR. CONTABLE", "codigo": "SIC", "anio": "4", "division": "3", "curso": "43", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS SILVIA", "materia": "TEORIA DE LAS ORGANIZACIONES", "codigo": "TDO", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MIERCOLES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS SILVIA", "materia": "TEORIA DE LAS ORGANIZACIONES", "codigo": "TDO", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "MIERCOLES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS SILVIA", "materia": "SISTEMA INF. CONTABLE", "codigo": "SIC", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "JUEVES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS SILVIA", "materia": "SISTEMA INF. CONTABLE", "codigo": "SIC", "anio": "4", "division": "2", "curso": "42", "turno": "Tarde", "dia": "JUEVES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS YAMILA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "LUNES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS YAMILA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "3", "division": "1", "curso": "31", "turno": "Mañana", "dia": "LUNES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS YAMILA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "LUNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS YAMILA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "LUNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS YAMILA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "LUNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS YAMILA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "3", "division": "3", "curso": "33", "turno": "Tarde", "dia": "LUNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS YAMILA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "LUNES", "horario": "15.10 a 16.10", "capacidad": 15, "asignados": 0}, {"nombre": "VALLEJOS YAMILA", "materia": "BIOLOGIA", "codigo": "BLG", "anio": "3", "division": "4", "curso": "34", "turno": "Tarde", "dia": "LUNES", "horario": "16.20 a 17.20", "capacidad": 15, "asignados": 0}, {"nombre": "VALLES CRISTINA", "materia": "HISTORIA", "codigo": "HTR", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "VIERNES", "horario": "13.00 a 14.00", "capacidad": 15, "asignados": 0}, {"nombre": "VALLES CRISTINA", "materia": "HISTORIA", "codigo": "HTR", "anio": "4", "division": "4", "curso": "44", "turno": "Tarde", "dia": "VIERNES", "horario": "14.10 a 15.10", "capacidad": 15, "asignados": 0}, {"nombre": "VILLAMAYOR NORMA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "VILLAMAYOR NORMA", "materia": "ED. ARTISTICA PLASTICA", "codigo": "APV", "anio": "1", "division": "1", "curso": "11", "turno": "Mañana", "dia": "VIERNES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "ZIS JULIETA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "MARTES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "ZIS JULIETA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "MARTES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "ZIS JULIETA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "MARTES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}, {"nombre": "ZIS JULIETA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "MIERCOLES", "horario": "7.20 a 8.20", "capacidad": 15, "asignados": 0}, {"nombre": "ZIS JULIETA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "3", "division": "2", "curso": "32", "turno": "Mañana", "dia": "MIERCOLES", "horario": "8.30 a 9.30", "capacidad": 15, "asignados": 0}, {"nombre": "ZIS JULIETA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "JUEVES", "horario": "11.40 a 12.40", "capacidad": 15, "asignados": 0}, {"nombre": "ZIS JULIETA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "VIERNES", "horario": "10.40 a 11.40", "capacidad": 15, "asignados": 0}, {"nombre": "ZIS JULIETA", "materia": "MATEMATICA", "codigo": "MTM", "anio": "1", "division": "2", "curso": "12", "turno": "Mañana", "dia": "VIERNES", "horario": "9.30 a 10.30", "capacidad": 15, "asignados": 0}];
+        
+        let alumnos = JSON.parse(localStorage.getItem('alumnos')) || [];
+        let horarioSeleccionadoActual = null;
+        
+        function cambiarTab(index) {{
+            document.querySelectorAll('.tab').forEach((t, i) => {{
+                t.classList.toggle('active', i === index);
+            }});
+            document.querySelectorAll('.content').forEach((c, i) => {{
+                c.classList.toggle('active', i === index);
+            }});
+            
+            if (index === 1) mostrarAlumnos();
+            if (index === 2) inicializarBusquedaHorarios();
+            if (index === 3) mostrarProfesores();
+            if (index === 4) mostrarEstadisticas();
+        }}
+        
+        function actualizarMaterias() {{
+            const anio = document.getElementById('anioAlumno').value;
+            const turno = document.getElementById('turnoAlumno').value;
+            const selectMateria = document.getElementById('materiaAlumno');
+            
+            if (!anio || !turno) {{
+                selectMateria.innerHTML = '<option value="">Primero selecciona año y turno...</option>';
+                document.getElementById('horariosDisponibles').style.display = 'none';
+                return;
+            }}
+            
+            const materiasDisponibles = [...new Set(PROFESORES_DB
+                .filter(p => p.anio === anio && p.turno === turno)
+                .map(p => p.materia))].sort();
+            
+            selectMateria.innerHTML = '<option value="">Seleccionar materia...</option>' +
+                materiasDisponibles.map(m => `<option value="${{m}}">${{m}}</option>`).join('');
+            
+            document.getElementById('horariosDisponibles').style.display = 'none';
+            document.getElementById('horarioSeleccionado').style.display = 'none';
+        }}
+        
+        function mostrarHorariosDisponibles() {{
+            const anio = document.getElementById('anioAlumno').value;
+            const turno = document.getElementById('turnoAlumno').value;
+            const materia = document.getElementById('materiaAlumno').value;
+            
+            if (!materia) return;
+            
+            const horarios = PROFESORES_DB.filter(p => 
+                p.anio === anio && p.turno === turno && p.materia === materia
+            );
+            
+            const container = document.getElementById('listaHorarios');
+            container.innerHTML = horarios.map((h, idx) => `
+                <div class="profesor-card" onclick="seleccionarHorario(${{idx}}, ${{JSON.stringify(h).replace(/"/g, '&quot;')}})">
+                    <div class="profesor-nombre">${{h.profesor}}</div>
+                    <div class="profesor-info">
+                        📅 ${{h.dia}} | ⏰ ${{h.horario}} | 
+                        <span class="badge badge-${{h.turno.toLowerCase()}}">${{h.turno}}</span> |
+                        Curso: ${{h.anio}}°${{h.division}}°
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('horariosDisponibles').style.display = 'block';
+        }}
+        
+        function seleccionarHorario(idx, horario) {{
+            horarioSeleccionadoActual = horario;
+            
+            document.querySelectorAll('#listaHorarios .profesor-card').forEach((card, i) => {{
+                card.classList.toggle('selected', i === idx);
+            }});
+            
+            document.getElementById('infoHorarioSeleccionado').textContent = 
+                `${{horario.profesor}} - ${{horario.dia}} ${{horario.horario}} (${{horario.turno}})`;
+            document.getElementById('horarioSeleccionado').style.display = 'block';
+        }}
+        
+        function asignarAlumno(e) {{
+            e.preventDefault();
+            
+            if (!horarioSeleccionadoActual) {{
+                alert('❌ Por favor selecciona un horario de la lista');
+                return;
+            }}
+            
+            const alumno = {{
+                dni: document.getElementById('dniAlumno').value,
+                nombre: document.getElementById('nombreAlumno').value,
+                anio: document.getElementById('anioAlumno').value,
+                division: document.getElementById('divisionAlumno').value,
+                turno: document.getElementById('turnoAlumno').value,
+                materia: document.getElementById('materiaAlumno').value,
+                profesor: horarioSeleccionadoActual.profesor,
+                dia: horarioSeleccionadoActual.dia,
+                horario: horarioSeleccionadoActual.horario,
+                fechaAsignacion: new Date().toISOString()
+            }};
+            
+            alumnos.push(alumno);
+            localStorage.setItem('alumnos', JSON.stringify(alumnos));
+            
+            alert('✅ Alumno asignado exitosamente');
+            document.getElementById('formAsignar').reset();
+            document.getElementById('horariosDisponibles').style.display = 'none';
+            document.getElementById('horarioSeleccionado').style.display = 'none';
+            horarioSeleccionadoActual = null;
+            actualizarStats();
+        }}
+        
+        function mostrarAlumnos() {{
+            const container = document.getElementById('listaAlumnos');
+            
+            if (alumnos.length === 0) {{
+                container.innerHTML = '<div class="empty-state">📝 No hay alumnos asignados todavía</div>';
+                return;
+            }}
+            
+            container.innerHTML = alumnos.map((a, idx) => `
+                <div class="alumno-card">
+                    <div class="alumno-header">
+                        <div>
+                            <div class="alumno-nombre">${{a.nombre}}</div>
+                            <div style="font-size:13px;color:var(--text-light);margin-top:4px;">
+                                DNI: ${{a.dni}} | ${{a.anio}}°${{a.division}}° | <span class="badge badge-${{a.turno.toLowerCase()}}">${{a.turno}}</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarAlumno(${{idx}})">Eliminar</button>
+                    </div>
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                        <strong>📚 Materia:</strong> ${{a.materia}}<br>
+                        <strong>👨‍🏫 Profesor:</strong> ${{a.profesor}}<br>
+                        <strong>📅 Horario:</strong> ${{a.dia}} ${{a.horario}}
+                    </div>
+                </div>
+            `).join('');
+        }}
+        
+        function eliminarAlumno(idx) {{
+            if (confirm('¿Eliminar este alumno?')) {{
+                alumnos.splice(idx, 1);
+                localStorage.setItem('alumnos', JSON.stringify(alumnos));
+                mostrarAlumnos();
+                actualizarStats();
+            }}
+        }}
+        
+        function filtrarAlumnos() {{
+            const busqueda = document.getElementById('buscarAlumno').value.toLowerCase();
+            const alumnosFiltrados = alumnos.filter(a => 
+                a.nombre.toLowerCase().includes(busqueda) || 
+                a.dni.includes(busqueda)
+            );
+            
+            const container = document.getElementById('listaAlumnos');
+            if (alumnosFiltrados.length === 0) {{
+                container.innerHTML = '<div class="empty-state">🔍 No se encontraron resultados</div>';
+                return;
+            }}
+            
+            container.innerHTML = alumnosFiltrados.map((a, idx) => `
+                <div class="alumno-card">
+                    <div class="alumno-header">
+                        <div>
+                            <div class="alumno-nombre">${{a.nombre}}</div>
+                            <div style="font-size:13px;color:var(--text-light);margin-top:4px;">
+                                DNI: ${{a.dni}} | ${{a.anio}}°${{a.division}}° | <span class="badge badge-${{a.turno.toLowerCase()}}">${{a.turno}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                        <strong>📚 Materia:</strong> ${{a.materia}}<br>
+                        <strong>👨‍🏫 Profesor:</strong> ${{a.profesor}}<br>
+                        <strong>📅 Horario:</strong> ${{a.dia}} ${{a.horario}}
+                    </div>
+                </div>
+            `).join('');
+        }}
+        
+        function inicializarBusquedaHorarios() {{
+            const profesores = [...new Set(PROFESORES_DB.map(p => p.profesor))].sort();
+            const materias = [...new Set(PROFESORES_DB.map(p => p.materia))].sort();
+            
+            document.getElementById('filtroProfesor').innerHTML = 
+                '<option value="">Todos los profesores</option>' +
+                profesores.map(p => `<option value="${{p}}">${{p}}</option>`).join('');
+            
+            document.getElementById('filtroMateria').innerHTML =
+                '<option value="">Todas las materias</option>' +
+                materias.map(m => `<option value="${{m}}">${{m}}</option>`).join('');
+            
+            filtrarHorarios();
+        }}
+        
+        function filtrarHorarios() {{
+            const prof = document.getElementById('filtroProfesor').value;
+            const mat = document.getElementById('filtroMateria').value;
+            const anio = document.getElementById('filtroAnio').value;
+            const turno = document.getElementById('filtroTurno').value;
+            
+            let horarios = PROFESORES_DB;
+            if (prof) horarios = horarios.filter(h => h.profesor === prof);
+            if (mat) horarios = horarios.filter(h => h.materia === mat);
+            if (anio) horarios = horarios.filter(h => h.anio === anio);
+            if (turno) horarios = horarios.filter(h => h.turno === turno);
+            
+            const tbody = document.getElementById('tablaHorarios');
+            tbody.innerHTML = horarios.map(h => `
+                <tr>
+                    <td>${{h.profesor}}</td>
+                    <td>${{h.materia}}</td>
+                    <td>${{h.anio}}°${{h.division}}°</td>
+                    <td><span class="badge badge-${{h.turno.toLowerCase()}}">${{h.turno}}</span></td>
+                    <td>${{h.dia}}</td>
+                    <td>${{h.horario}}</td>
+                </tr>
+            `).join('');
+        }}
+        
+        function mostrarProfesores() {{
+            const profesUnicos = [...new Map(PROFESORES_DB.map(p => [p.profesor, p])).values()];
+            const container = document.getElementById('listaProfesores');
+            
+            container.innerHTML = profesUnicos.sort((a,b) => a.profesor.localeCompare(b.profesor))
+                .map(p => {{
+                    const horarios = PROFESORES_DB.filter(h => h.profesor === p.profesor);
+                    return `
+                        <div class="profesor-card">
+                            <div class="profesor-nombre">${{p.profesor}}</div>
+                            <div class="profesor-info">
+                                📚 ${{horarios.length}} horarios registrados | 
+                                ${{[...new Set(horarios.map(h => h.materia))].length}} materias diferentes
+                            </div>
+                        </div>
+                    `;
+                }}).join('');
+        }}
+        
+        function filtrarProfesores() {{
+            const busqueda = document.getElementById('buscarProfesor').value.toLowerCase();
+            const profesUnicos = [...new Map(PROFESORES_DB.map(p => [p.profesor, p])).values()];
+            const profesFiltrados = profesUnicos.filter(p => 
+                p.profesor.toLowerCase().includes(busqueda)
+            );
+            
+            const container = document.getElementById('listaProfesores');
+            container.innerHTML = profesFiltrados.sort((a,b) => a.profesor.localeCompare(b.profesor))
+                .map(p => {{
+                    const horarios = PROFESORES_DB.filter(h => h.profesor === p.profesor);
+                    return `
+                        <div class="profesor-card">
+                            <div class="profesor-nombre">${{p.profesor}}</div>
+                            <div class="profesor-info">
+                                📚 ${{horarios.length}} horarios | 
+                                ${{[...new Set(horarios.map(h => h.materia))].length}} materias
+                            </div>
+                        </div>
+                    `;
+                }}).join('');
+        }}
+        
+        function mostrarEstadisticas() {{
+            const materias = [...new Set(PROFESORES_DB.map(p => p.materia))];
+            const cursos = [...new Set(PROFESORES_DB.map(p => p.curso))];
+            
+            document.getElementById('statMaterias').textContent = materias.length;
+            document.getElementById('statCursos').textContent = cursos.length;
+            
+            const profesCount = {{}};
+            PROFESORES_DB.forEach(p => {{
+                profesCount[p.profesor] = (profesCount[p.profesor] || 0) + 1;
+            }});
+            
+            const top = Object.entries(profesCount)
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            document.getElementById('topProfesores').innerHTML = top.map(([prof, count], i) => `
+                <div class="profesor-card">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span><strong>${{i+1}}.</strong> ${{prof}}</span>
+                        <span class="badge badge-tarde">${{count}} horarios</span>
+                    </div>
+                </div>
+            `).join('');
+        }}
+        
+        function actualizarStats() {{
+            document.getElementById('statAlumnos').textContent = alumnos.length;
+        }}
+        
+        window.onload = function() {{
+            actualizarStats();
+            console.log('✅ Sistema cargado con', PROFESORES_DB.length, 'horarios');
+        }};
+    </script>
+</body>
+</html>
