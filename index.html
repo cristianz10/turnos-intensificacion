@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Intensificación - Escuela Secundaria</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #1a2632);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .card h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+        }
+
+        .row-2cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #229954;
+        }
+
+        .btn-warning {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .estado-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .estado-en-curso {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .estado-aprobado {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .estado-continua-intensificando {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .acciones-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .badge-info {
+            background-color: #e1f5fe;
+            color: #0277bd;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .acta-text {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mt-2 {
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .row-2cols {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏫 Sistema de Intensificación de Materias</h1>
+            <p>Gestión de asignación de docentes para alumnos con materias pendientes | Resolución 2026-EDTE</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Sección de carga de Excel -->
+        <div class="card">
+            <h2>📂 Cargar Horarios desde Excel</h2>
+            <div class="flex-between">
+                <div style="flex: 1;">
+                    <input type="file" id="excelUpload" accept=".xlsx, .xls, .csv">
+                    <small class="mt-2" style="display: block; color: #666;">Selecciona el archivo HORARIOS_2026_CONSOLIDADO.xlsx</small>
+                </div>
+                <button id="btnCargarEjemplo" class="btn btn-warning">Cargar Datos de Ejemplo</button>
+            </div>
+            <div id="infoCarga" class="alert alert-info" style="display: none;"></div>
+        </div>
+
+        <!-- Registro de Alumnos -->
+        <div class="card">
+            <h2>👥 Registrar Alumno</h2>
+            <form id="registroAlumnoForm">
+                <div class="row-2cols">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" id="alumnoNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido</label>
+                        <input type="text" id="alumnoApellido" required>
+                    </div>
+                </div>
+                <div class="row-2cols">
+                    <div class="form-group">
+                        <label>DNI</label>
+                        <input type="text" id="alumnoDNI" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Curso (ej: 5°2°)</label>
+                        <input type="text" id="alumnoCurso" required placeholder="Formato: 1°1°, 5°2°, etc.">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Registrar Alumno</button>
+            </form>
+        </div>
+
+        <!-- Gestión de materias pendientes por alumno -->
+        <div class="card">
+            <h2>📚 Materias Pendientes por Alumno</h2>
+            <div class="row-2cols">
+                <div class="form-group">
+                    <label>Seleccionar Alumno</label>
+                    <select id="pendienteAlumnoSelect">
+                        <option value="">Seleccionar...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Materia Pendiente (solo del curso)</label>
+                    <select id="pendienteMateriaSelect">
+                        <option value="">Seleccionar materia...</option>
+                    </select>
+                </div>
+            </div>
+            <button id="btnAgregarPendiente" class="btn btn-success">Agregar Materia Pendiente</button>
+            <div class="table-container mt-2">
+                <table id="pendientesTable">
+                    <thead><tr><th>Alumno</th><th>Materias Pendientes</th><th>Acciones</th></tr></thead>
+                    <tbody id="pendientesBody"></tbody>
+                </table>
+            </div>
+            <div id="warningPendientes" class="alert alert-warning" style="display: none;"></div>
+        </div>
+
+        <!-- Formulario de Asignación -->
+        <div class="card">
+            <h2>📝 Nueva Asignación de Intensificación</h2>
+            <form id="asignacionForm">
+                <div class="row-2cols">
+                    <div class="form-group">
+                        <label>Alumno</label>
+                        <select id="alumnoSelect" required>
+                            <option value="">Seleccionar alumno...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Materia Pendiente (del alumno)</label>
+                        <select id="materiaSelect" required>
+                            <option value="">Seleccionar materia...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Modelo de Intensificación</label>
+                    <select id="modeloSelect" required>
+                        <option value="">Seleccionar modelo...</option>
+                        <option value="1">Modelo 1: Con docente de materia correlativa del año superior</option>
+                        <option value="2">Modelo 2: En misma sección y turno con docente a cargo</option>
+                        <option value="3">Modelo 3: En misma materia pero en contraturno</option>
+                        <option value="4">Modelo 4: Espacios específicos (sábados/final turno)</option>
+                    </select>
+                </div>
+                <div class="row-2cols">
+                    <div class="form-group">
+                        <label>Docente Asignado</label>
+                        <select id="docenteSelect" required>
+                            <option value="">Seleccionar docente...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Días y Horario</label>
+                        <input type="text" id="horarioInput" placeholder="Ej: Lunes 13:00-15:00" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Observaciones (opcional)</label>
+                    <input type="text" id="observacionesInput">
+                </div>
+                <button type="submit" class="btn btn-primary">✅ Asignar Intensificación</button>
+            </form>
+        </div>
+
+        <!-- Tabla de Seguimiento -->
+        <div class="card">
+            <h2>📊 Seguimiento de Intensificaciones</h2>
+            <div class="table-container">
+                <table id="seguimientoTable">
+                    <thead><tr><th>Alumno</th><th>Materia</th><th>Docente</th><th>Modelo</th><th>Horario</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="seguimientoBody"></tbody>
+                </table>
+            </div>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button id="btnGenerarActaGeneral" class="btn btn-warning">📄 Generar Acta General</button>
+                <button id="btnExportarExcel" class="btn btn-success">📊 Exportar a Excel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Acta -->
+    <div id="actaModal" class="modal">
+        <div class="modal-content">
+            <h3>📋 Acta de Asignación - Intensificación</h3>
+            <div id="actaTexto" class="acta-text"></div>
+            <button id="btnCerrarModal" class="btn btn-primary">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        // Estado global
+        let profesores = [];           // lista de nombres
+        let materiasSet = new Set();    // todas las materias del Excel
+        let cursosMaterias = {};        // mapeo curso -> Set de materias que se dictan en ese curso
+        let alumnos = JSON.parse(localStorage.getItem('alumnos')) || [];
+        let materiasPendientes = JSON.parse(localStorage.getItem('materiasPendientes')) || {}; // { alumnoId: [{nombre, anio}] }
+        let asignaciones = JSON.parse(localStorage.getItem('intensificaciones')) || [];
+
+        // Helper: mostrar alerta
+        function showAlert(message, type = 'danger') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.innerHTML = message;
+            alertDiv.style.display = 'block';
+            const container = document.getElementById('alertContainer');
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // Cargar Excel
+        document.getElementById('excelUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
+                procesarExcel(rows);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function procesarExcel(rows) {
+            // Buscar la fila de encabezados (debería tener "Profesor", "Materia", "Curso")
+            let headerRowIndex = -1;
+            for (let i = 0; i < rows.length; i++) {
+                if (rows[i] && rows[i].some(cell => typeof cell === 'string' && cell.toLowerCase().includes('profesor'))) {
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+            if (headerRowIndex === -1) {
+                showAlert('No se encontró la fila de encabezados (Profesor, Materia, Curso). Revisá el archivo.', 'danger');
+                return;
+            }
+            const headers = rows[headerRowIndex];
+            const idxProfesor = headers.findIndex(h => h && h.toLowerCase().includes('profesor'));
+            const idxMateria = headers.findIndex(h => h && h.toLowerCase().includes('materia'));
+            const idxCurso = headers.findIndex(h => h && h.toLowerCase().includes('curso'));
+            if (idxProfesor === -1 || idxMateria === -1 || idxCurso === -1) {
+                showAlert('Faltan columnas requeridas: Profesor, Materia, Curso.', 'danger');
+                return;
+            }
+
+            const profSet = new Set();
+            const materiasCurso = {};
+            for (let i = headerRowIndex + 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length === 0) continue;
+                const profesor = row[idxProfesor] ? row[idxProfesor].toString().trim() : '';
+                const materia = row[idxMateria] ? row[idxMateria].toString().trim() : '';
+                const curso = row[idxCurso] ? row[idxCurso].toString().trim() : '';
+                if (profesor && materia && curso) {
+                    profSet.add(profesor);
+                    if (!materiasCurso[curso]) materiasCurso[curso] = new Set();
+                    materiasCurso[curso].add(materia);
+                }
+            }
+            profesores = Array.from(profSet).sort();
+            materiasSet = new Set();
+            Object.values(materiasCurso).forEach(set => set.forEach(m => materiasSet.add(m)));
+            cursosMaterias = materiasCurso;
+
+            // Actualizar selectores
+            actualizarSelectores();
+            const infoDiv = document.getElementById('infoCarga');
+            infoDiv.style.display = 'block';
+            infoDiv.innerHTML = `✅ Datos cargados: ${profesores.length} profesores, ${materiasSet.size} materias, ${Object.keys(cursosMaterias).length} cursos.`;
+            setTimeout(() => infoDiv.style.display = 'none', 5000);
+        }
+
+        function cargarDatosEjemplo() {
+            // Datos de ejemplo extraídos del archivo original
+            profesores = [
+                "ACOSTA HECTOR", "ALBERT SILVIO", "ALLEGUE ANA MARIA", "ALVARES SANDRA", "AQUINO MABEL",
+                "AREBALO LUIS", "AUGUSTO ADRIANA", "BAEZ ISABEL", "BAIO CLAUDIA", "BELINI ANDREA",
+                "BELMONTE SILVIA", "BENITEZ DORA", "BERMEJO ELEONORA", "BRANDAN NATALIA"
+            ];
+            cursosMaterias = {
+                "5°2°": new Set(["POLITICA Y CIUDADANIA", "MATEMATICA CICLO SUPERIOR", "GEOGRAFIA", "LITERATURA"]),
+                "4°3°": new Set(["GEOGRAFIA", "MATEMATICA CICLO SUPERIOR", "INGLES", "LITERATURA"]),
+                "3°1°": new Set(["ED. ARTISTICA PLASTICA", "MATEMATICA", "HISTORIA", "CIENCIAS NATURALES"]),
+                "6°5°": new Set(["INGLES", "QUIMICA DEL CARBONO", "BIOLOGIA GENETICA Y SOCIEDAD", "FISICA CLASICA Y MODERNA"]),
+                "2°4°": new Set(["GEOGRAFIA", "PRACTICAS DEL LENGUAJE", "FISICO QUIMICA", "MATEMATICA"])
+            };
+            materiasSet = new Set();
+            Object.values(cursosMaterias).forEach(set => set.forEach(m => materiasSet.add(m)));
+            actualizarSelectores();
+            showAlert('Datos de ejemplo cargados. Podés subir tu Excel para reemplazarlos.', 'success');
+        }
+
+        function actualizarSelectores() {
+            // Actualizar docenteSelect en asignación
+            const docenteSelect = document.getElementById('docenteSelect');
+            docenteSelect.innerHTML = '<option value="">Seleccionar docente...</option>';
+            profesores.forEach(prof => {
+                const opt = document.createElement('option');
+                opt.value = prof;
+                opt.textContent = prof;
+                docenteSelect.appendChild(opt);
+            });
+            // También actualizar combo de materias pendientes (por alumno)
+            actualizarPendienteMaterias();
+        }
+
+        function actualizarPendienteMaterias() {
+            const alumnoId = document.getElementById('pendienteAlumnoSelect').value;
+            const materiaSelect = document.getElementById('pendienteMateriaSelect');
+            materiaSelect.innerHTML = '<option value="">Seleccionar materia...</option>';
+            if (!alumnoId) return;
+            const alumno = alumnos.find(a => a.id == alumnoId);
+            if (!alumno) return;
+            const curso = alumno.curso;
+            const materiasCurso = cursosMaterias[curso] || new Set();
+            if (materiasCurso.size === 0) {
+                materiaSelect.innerHTML = '<option value="">No hay materias cargadas para este curso</option>';
+                return;
+            }
+            materiasCurso.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                materiaSelect.appendChild(opt);
+            });
+        }
+
+        // Registrar alumno
+        document.getElementById('registroAlumnoForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('alumnoNombre').value.trim();
+            const apellido = document.getElementById('alumnoApellido').value.trim();
+            const dni = document.getElementById('alumnoDNI').value.trim();
+            const curso = document.getElementById('alumnoCurso').value.trim();
+            if (!nombre || !apellido || !dni || !curso) {
+                showAlert('Complete todos los campos', 'danger');
+                return;
+            }
+            if (alumnos.some(a => a.dni === dni)) {
+                showAlert('Ya existe un alumno con ese DNI', 'danger');
+                return;
+            }
+            if (Object.keys(cursosMaterias).length > 0 && !cursosMaterias[curso]) {
+                showAlert(`El curso "${curso}" no existe en los horarios cargados. Podés continuar, pero no tendrá materias asociadas.`, 'warning');
+            }
+            const newId = alumnos.length ? Math.max(...alumnos.map(a => a.id)) + 1 : 1;
+            alumnos.push({ id: newId, nombre, apellido, dni, curso });
+            localStorage.setItem('alumnos', JSON.stringify(alumnos));
+            actualizarSelectoresAlumnos();
+            document.getElementById('registroAlumnoForm').reset();
+            showAlert('Alumno registrado correctamente', 'success');
+        });
+
+        function actualizarSelectoresAlumnos() {
+            const alumnoSelect = document.getElementById('alumnoSelect');
+            const pendienteAlumnoSelect = document.getElementById('pendienteAlumnoSelect');
+            alumnoSelect.innerHTML = '<option value="">Seleccionar alumno...</option>';
+            pendienteAlumnoSelect.innerHTML = '<option value="">Seleccionar alumno...</option>';
+            alumnos.forEach(alumno => {
+                const text = `${alumno.apellido}, ${alumno.nombre} (${alumno.curso}) - DNI: ${alumno.dni}`;
+                const opt1 = document.createElement('option');
+                opt1.value = alumno.id;
+                opt1.textContent = text;
+                alumnoSelect.appendChild(opt1);
+                const opt2 = document.createElement('option');
+                opt2.value = alumno.id;
+                opt2.textContent = text;
+                pendienteAlumnoSelect.appendChild(opt2);
+            });
+            if (alumnos.length === 0) {
+                alumnoSelect.innerHTML = '<option value="">No hay alumnos registrados</option>';
+                pendienteAlumnoSelect.innerHTML = '<option value="">No hay alumnos registrados</option>';
+            }
+            actualizarPendienteMaterias();
+            actualizarMateriasPendientesPorAlumno(); // actualiza la tabla de pendientes
+        }
+
+        // Materias pendientes
+        document.getElementById('pendienteAlumnoSelect').addEventListener('change', actualizarPendienteMaterias);
+        document.getElementById('btnAgregarPendiente').addEventListener('click', function() {
+            const alumnoId = document.getElementById('pendienteAlumnoSelect').value;
+            const materia = document.getElementById('pendienteMateriaSelect').value;
+            if (!alumnoId || !materia) {
+                showAlert('Seleccione un alumno y una materia', 'danger');
+                return;
+            }
+            const alumno = alumnos.find(a => a.id == alumnoId);
+            if (!alumno) return;
+            const pendientes = materiasPendientes[alumnoId] || [];
+            if (pendientes.some(p => p.nombre === materia)) {
+                showAlert('Esta materia ya está cargada como pendiente para este alumno', 'warning');
+                return;
+            }
+            if (pendientes.length >= 5) {
+                showAlert('El alumno ya tiene 5 materias pendientes. Se requiere intervención del EDTE para definir recursado/intensificación.', 'danger');
+                return;
+            }
+            pendientes.push({ nombre: materia, anio: obtenerAnioDesdeMateria(materia) }); // anio no se usa pero se guarda
+            materiasPendientes[alumnoId] = pendientes;
+            localStorage.setItem('materiasPendientes', JSON.stringify(materiasPendientes));
+            actualizarMateriasPendientesPorAlumno();
+            showAlert('Materia pendiente agregada', 'success');
+        });
+
+        function obtenerAnioDesdeMateria(materia) {
+            // simplificado: extraer año de la materia si tiene formato "5°" etc.
+            const match = materia.match(/\d+°/);
+            return match ? match[0] : '';
+        }
+
+        function actualizarMateriasPendientesPorAlumno() {
+            const tbody = document.getElementById('pendientesBody');
+            tbody.innerHTML = '';
+            for (let alumnoId in materiasPendientes) {
+                const alumno = alumnos.find(a => a.id == alumnoId);
+                if (!alumno) continue;
+                const pendientes = materiasPendientes[alumnoId];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${alumno.apellido}, ${alumno.nombre} (${alumno.curso})</td>
+                    <td>${pendientes.map(p => p.nombre).join(', ') || 'Ninguna'}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="eliminarPendientesAlumno(${alumnoId})">Eliminar todas</button></td>
+                `;
+                tbody.appendChild(row);
+            }
+            if (Object.keys(materiasPendientes).length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No hay materias pendientes registradas</td></tr>';
+            }
+            // Mostrar warning si algún alumno tiene más de 4 pendientes
+            let warning = '';
+            for (let alumnoId in materiasPendientes) {
+                if (materiasPendientes[alumnoId].length >= 5) {
+                    const alumno = alumnos.find(a => a.id == alumnoId);
+                    warning += `${alumno.apellido}, ${alumno.nombre} tiene ${materiasPendientes[alumnoId].length} materias pendientes. Requiere intervención EDTE.<br>`;
+                }
+            }
+            const warningDiv = document.getElementById('warningPendientes');
+            if (warning) {
+                warningDiv.innerHTML = warning;
+                warningDiv.style.display = 'block';
+            } else {
+                warningDiv.style.display = 'none';
+            }
+        }
+
+        window.eliminarPendientesAlumno = function(alumnoId) {
+            if (confirm('¿Eliminar todas las materias pendientes de este alumno?')) {
+                delete materiasPendientes[alumnoId];
+                localStorage.setItem('materiasPendientes', JSON.stringify(materiasPendientes));
+                actualizarMateriasPendientesPorAlumno();
+                showAlert('Materias pendientes eliminadas', 'success');
+            }
+        };
+
+        // Asignación de intensificación
+        function actualizarMateriasPendientesSelect() {
+            const alumnoId = document.getElementById('alumnoSelect').value;
+            const materiaSelect = document.getElementById('materiaSelect');
+            materiaSelect.innerHTML = '<option value="">Seleccionar materia...</option>';
+            if (!alumnoId) return;
+            const pendientes = materiasPendientes[alumnoId] || [];
+            if (pendientes.length === 0) {
+                materiaSelect.innerHTML = '<option value="">Este alumno no tiene materias pendientes</option>';
+                return;
+            }
+            pendientes.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.nombre;
+                opt.textContent = p.nombre;
+                materiaSelect.appendChild(opt);
+            });
+        }
+
+        document.getElementById('alumnoSelect').addEventListener('change', function() {
+            actualizarMateriasPendientesSelect();
+        });
+
+        function validarLimiteAsignaciones(alumnoId, materia) {
+            const asignadas = asignaciones.filter(a => a.alumnoId == alumnoId);
+            if (asignadas.length >= 4) {
+                return { valid: false, message: `El alumno ya tiene ${asignadas.length} materias asignadas. Límite máximo 4.` };
+            }
+            const yaAsignada = asignadas.some(a => a.materia === materia);
+            if (yaAsignada) {
+                return { valid: false, message: 'Esta materia ya fue asignada a este alumno' };
+            }
+            return { valid: true };
+        }
+
+        document.getElementById('asignacionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const alumnoId = parseInt(document.getElementById('alumnoSelect').value);
+            const materia = document.getElementById('materiaSelect').value;
+            const modelo = document.getElementById('modeloSelect').value;
+            const docente = document.getElementById('docenteSelect').value;
+            const horario = document.getElementById('horarioInput').value;
+            const observaciones = document.getElementById('observacionesInput').value;
+
+            if (!alumnoId || !materia || !modelo || !docente || !horario) {
+                showAlert('Complete todos los campos obligatorios', 'danger');
+                return;
+            }
+            const limite = validarLimiteAsignaciones(alumnoId, materia);
+            if (!limite.valid) {
+                showAlert(limite.message, 'danger');
+                return;
+            }
+            const nueva = {
+                alumnoId,
+                materia,
+                modelo,
+                docente,
+                horario,
+                observaciones,
+                estado: 'En curso',
+                fecha: new Date().toISOString()
+            };
+            asignaciones.push(nueva);
+            localStorage.setItem('intensificaciones', JSON.stringify(asignaciones));
+            actualizarTablaSeguimiento();
+            document.getElementById('asignacionForm').reset();
+            // resetear selectores
+            actualizarSelectoresAlumnos();
+            showAlert('Asignación creada', 'success');
+        });
+
+        function actualizarTablaSeguimiento() {
+            const tbody = document.getElementById('seguimientoBody');
+            if (asignaciones.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No hay asignaciones registradas</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            asignaciones.forEach((asig, idx) => {
+                const alumno = alumnos.find(a => a.id === asig.alumnoId);
+                if (!alumno) return;
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${alumno.apellido}, ${alumno.nombre} (${alumno.curso})</td>
+                    <td>${asig.materia}</td>
+                    <td>${asig.docente}</td>
+                    <td><span class="badge-info">Modelo ${asig.modelo}</span></td>
+                    <td>${asig.horario}</td>
+                    <td><span class="estado-badge estado-${asig.estado.toLowerCase().replace(/ /g, '-')}">${asig.estado}</span></td>
+                    <td class="acciones-btns">
+                        <button class="btn btn-sm btn-success" onclick="cambiarEstado(${idx}, 'Aprobado')">✓ Aprobar</button>
+                        <button class="btn btn-sm btn-warning" onclick="cambiarEstado(${idx}, 'Continúa intensificando')">⟳ Continuar</button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarAsignacion(${idx})">🗑 Eliminar</button>
+                        <button class="btn btn-sm btn-primary" onclick="generarActaIndividual(${idx})">📄 Acta</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        window.cambiarEstado = function(idx, nuevo) {
+            if (asignaciones[idx]) {
+                asignaciones[idx].estado = nuevo;
+                localStorage.setItem('intensificaciones', JSON.stringify(asignaciones));
+                actualizarTablaSeguimiento();
+                showAlert(`Estado cambiado a "${nuevo}"`, 'success');
+            }
+        };
+        window.eliminarAsignacion = function(idx) {
+            if (confirm('¿Eliminar esta asignación?')) {
+                asignaciones.splice(idx, 1);
+                localStorage.setItem('intensificaciones', JSON.stringify(asignaciones));
+                actualizarTablaSeguimiento();
+                showAlert('Asignación eliminada', 'success');
+            }
+        };
+        window.generarActaIndividual = function(idx) {
+            const asig = asignaciones[idx];
+            const alumno = alumnos.find(a => a.id === asig.alumnoId);
+            if (!alumno) return;
+            const fecha = new Date().toLocaleDateString('es-AR');
+            const acta = `ACTA DE ASIGNACIÓN DE INTENSIFICACIÓN
+Escuela Secundaria - Año 2026
+Fecha: ${fecha}
+
+ALUMNO: ${alumno.apellido}, ${alumno.nombre}
+DNI: ${alumno.dni}
+CURSO: ${alumno.curso}
+
+MATERIA A INTENSIFICAR: ${asig.materia}
+MODELO APLICADO: Modelo ${asig.modelo}
+DOCENTE ASIGNADO: ${asig.docente}
+HORARIO: ${asig.horario}
+ESTADO ACTUAL: ${asig.estado}
+
+OBSERVACIONES: ${asig.observaciones || 'Sin observaciones'}
+
+RESPONSABILIDAD DE EVALUACIÓN:
+La calificación final será definida por el docente a cargo en conjunto con otro docente de la institución.
+
+Firma Docente: _________________________
+Firma Coordinación EDTE: _________________________
+
+--- Este documento es válido como Anexo 1 y 2 del Registro de Asistencia ---`;
+            document.getElementById('actaTexto').innerText = acta;
+            document.getElementById('actaModal').style.display = 'flex';
+        };
+
+        document.getElementById('btnGenerarActaGeneral').addEventListener('click', function() {
+            if (asignaciones.length === 0) {
+                showAlert('No hay asignaciones', 'warning');
+                return;
+            }
+            const fecha = new Date().toLocaleDateString('es-AR');
+            let texto = `ACTA GENERAL DE INTENSIFICACIONES\nEscuela Secundaria - Año 2026\nFecha: ${fecha}\nTotal: ${asignaciones.length}\n\n`;
+            asignaciones.forEach((asig, i) => {
+                const alumno = alumnos.find(a => a.id === asig.alumnoId);
+                if (alumno) {
+                    texto += `${i+1}. ${alumno.apellido}, ${alumno.nombre} (${alumno.curso}) - ${asig.materia} - ${asig.docente} - Estado: ${asig.estado}\n`;
+                }
+            });
+            texto += `\n--- Documento de seguimiento para Reunión EDTE ---\nFirma Coordinación: _________________________`;
+            document.getElementById('actaTexto').innerText = texto;
+            document.getElementById('actaModal').style.display = 'flex';
+        });
+
+        document.getElementById('btnExportarExcel').addEventListener('click', function() {
+            if (asignaciones.length === 0) {
+                showAlert('No hay datos para exportar', 'warning');
+                return;
+            }
+            const data = asignaciones.map(asig => {
+                const alumno = alumnos.find(a => a.id === asig.alumnoId);
+                return {
+                    Alumno: alumno ? `${alumno.apellido}, ${alumno.nombre} (${alumno.curso})` : '',
+                    Materia: asig.materia,
+                    Docente: asig.docente,
+                    Modelo: asig.modelo,
+                    Horario: asig.horario,
+                    Estado: asig.estado,
+                    Observaciones: asig.observaciones || ''
+                };
+            });
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Intensificaciones');
+            XLSX.writeFile(wb, `intensificaciones_${new Date().toISOString().slice(0,10)}.xlsx`);
+        });
+
+        document.getElementById('btnCerrarModal').addEventListener('click', () => {
+            document.getElementById('actaModal').style.display = 'none';
+        });
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('actaModal')) {
+                document.getElementById('actaModal').style.display = 'none';
+            }
+        };
+        document.getElementById('btnCargarEjemplo').addEventListener('click', cargarDatosEjemplo);
+
+        // Inicializar
+        function inicializar() {
+            actualizarSelectoresAlumnos();
+            actualizarTablaSeguimiento();
+            actualizarMateriasPendientesPorAlumno();
+            if (Object.keys(cursosMaterias).length === 0) {
+                showAlert('Por favor, cargue un archivo Excel con los horarios o use "Cargar Datos de Ejemplo".', 'info');
+            }
+        }
+        inicializar();
+    </script>
+</body>
+</html>
