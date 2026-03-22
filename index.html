@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turnos de Intensificacion - Secundaria Bonaerense</title>
+    <!-- Agregamos SheetJS para procesar Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; }
+        /* Estilos existentes permanecen igual */
+        .tab-container { display: flex; border-bottom: 1px solid #ddd; }
+        .tab { padding: 15px 20px; cursor: pointer; background: #f5f5f5; flex: 1; text-align: center; font-weight: bold; }
+        .tab.active { background: #667eea; color: white; }
+        .content { padding: 20px; display: none; }
+        .content.active { display: block; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .stats { display: flex; gap: 20px; margin: 20px 0; }
+        .stat-card { flex: 1; background: #f8f9fa; padding: 15px; border-radius: 5px; text-align: center; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #667eea; margin-bottom: 5px; }
+        .stat-label { color: #666; }
+        .alert { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .alert-info { background: #d1ecf1; color: #0c5460; border-left: 4px solid #17a2b8; }
+        .alert-success { background: #d4edda; color: #155724; border-left: 4px solid #28a745; }
+        .alert-warning { background: #fff3cd; color: #856404; border-left: 4px solid #ffc107; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #667eea; color: white; }
+        tr:hover { background: #f5f5f5; }
+        .cupo-lleno { color: #dc3545; font-weight: bold; }
+        .cupo-disponible { color: #28a745; font-weight: bold; }
+        .alumno-card { background: #f8f9fa; border-radius: 5px; padding: 15px; margin-bottom: 15px; }
+        .alumno-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .turno-tag { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .turno-mañana { background: #fff3cd; color: #856404; }
+        .turno-tarde { background: #d1ecf1; color: #0c5460; }
+        .turno-vespertino { background: #e2e3e5; color: #383d41; }
+        .debug-info { background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0; font-size: 12px; border-left: 3px solid #ffc107; }
+        .no-docentes-msg { color: #dc3545; font-size: 12px; margin-top: 5px; padding: 5px; background: #f8d7da; border-radius: 3px; }
+        
+        /* Nuevos estilos para la carga de Excel */
+        .excel-upload { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px dashed #667eea;
+        }
+        .excel-upload h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .excel-upload p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .excel-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .excel-status {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            display: none;
+        }
+        .excel-status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .excel-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .excel-preview {
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .excel-preview table {
+            width: 100%;
+            font-size: 12px;
+        }
+        .excel-preview th {
+            position: sticky;
+            top: 0;
+            background: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header style="background: #667eea; color: white; padding: 20px; text-align: center;">
+            <h1>Turnos de Intensificación - Secundaria Bonaerense</h1>
+            <p>Gestión de asignaciones para el año lectivo 2026</p>
+        </header>
+        
+        <!-- Nueva sección para cargar el Excel -->
+        <div class="excel-upload">
+            <h3>📚 Base de Datos de Horarios</h3>
+            <p>Para que el sistema funcione correctamente, carga el archivo <strong>HORARIOS_2026_CONSOLIDADO.xlsx</strong> que contiene la información de profesores, materias y horarios.</p>
+            
+            <input type="file" id="excelFile" accept=".xlsx, .xls" style="display: none;">
+            <button type="button" class="btn btn-success" onclick="document.getElementById('excelFile').click()">
+                🔍 Seleccionar Archivo Excel
+            </button>
+            
+            <div class="excel-controls">
+                <span id="fileName" style="color: #666; line-height: 2.5;">Ningún archivo seleccionado</span>
+            </div>
+            
+            <div id="excelStatus" class="excel-status"></div>
+            
+            <div class="excel-preview" id="excelPreview" style="display: none;">
+                <h4>Vista previa de los datos:</h4>
+                <table id="previewTable">
+                    <thead>
+                        <tr>
+                            <th>Profesor</th>
+                            <th>Materia</th>
+                            <th>Año</th>
+                            <th>Curso</th>
+                            <th>Turno</th>
+                            <th>Día</th>
+                            <th>Horario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los datos de la vista previa se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-container">
+            <div class="tab active" onclick="cambiarTab(0)">Asignar Alumno</div>
+            <div class="tab" onclick="cambiarTab(1)">Alumnos Asignados</div>
+            <div class="tab" onclick="cambiarTab(2)">Horarios Disponibles</div>
+            <div class="tab" onclick="cambiarTab(3)">Gestión de Profesores</div>
+        </div>
+        
+        <!-- TAB 0: ASIGNAR ALUMNO -->
+        <div id="tab0" class="content active">
+            <div class="alert alert-info">
+                <strong>Asignación Automática:</strong> El sistema sugerirá docentes con menor carga de alumnos para distribución equitativa.
+            </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button type="button" class="btn btn-warning" onclick="recargarDatosPrecargados()">🔄 Recargar Datos de Planillas</button>
+                <button type="button" class="btn btn-danger" onclick="limpiarTodo()">🗑️ Limpiar Todo</button>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="statTotalAlumnos">0</div>
+                    <div class="stat-label">Alumnos Asignados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statTotalProfes">0</div>
+                    <div class="stat-label">Profesores Activos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="statTotalCursos">0</div>
+                    <div class="stat-label">Cursos Registrados</div>
+                </div>
+            </div>
+            
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>DNI del Alumno</label>
+                    <input type="text" id="dniA" required>
+                </div>
+                <div class="form-group">
+                    <label>Nombre y Apellido</label>
+                    <input type="text" id="nombreA" required>
+                </div>
+            </div>
+            
+            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>Año del Alumno</label>
+                    <select id="anioAlumno" required onchange="actualizarMateriasDisponibles()">
+                        <option value="">Seleccionar...</option>
+                        <option value="1">1er Año</option>
+                        <option value="2">2do Año</option>
+                        <option value="3">3er Año</option>
+                        <option value="4">4to Año</option>
+                        <option value="5">5to Año</option>
+                        <option value="6">6to Año</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Turno del Alumno</label>
+                    <select id="turnoAlumno" required onchange="actualizarMateriasDisponibles()">
+                        <option value="">Seleccionar...</option>
+                        <option value="Mañana">Mañana</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Vespertino">Vespertino</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Materias a Intensificar</label>
+                <div id="materiasContainer" style="min-height: 100px; border: 1px solid #ddd; border-radius: 5px; padding: 10px; background: #f9f9f9;">
+                    <p style="color: #666;">Primero selecciona año y turno...</p>
+                </div>
+                <div id="debugInfo" class="debug-info" style="display: none;"></div>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" class="btn btn-success" onclick="asignarAlumno()">Asignar Alumno</button>
+            </div>
+            
+            <div id="resultado" style="margin-top: 20px;"></div>
+        </div>
+        
+        <!-- TAB 1: ALUMNOS ASIGNADOS -->
+        <div id="tab1" class="content">
+            <div class="alert alert-info">
+                <strong>Administración de Alumnos:</strong> Gestiona las asignaciones de intensificación de los alumnos.
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="filtroDNI" placeholder="Filtrar por DNI" oninput="filtrarAlumnos()">
+                <input type="text" id="filtroNombre" placeholder="Filtrar por Nombre" oninput="filtrarAlumnos()">
+                <select id="filtroAnio" onchange="filtrarAlumnos()">
+                    <option value="">Todos los años</option>
+                    <option value="1">1er Año</option>
+                    <option value="2">2do Año</option>
+                    <option value="3">3er Año</option>
+                    <option value="4">4to Año</option>
+                    <option value="5">5to Año</option>
+                    <option value="6">6to Año</option>
+                </select>
+            </div>
+            
+            <div id="listaAlumnos">
+                <!-- Los alumnos se mostrarán aquí -->
+            </div>
+        </div>
+        
+        <!-- TAB 2: HORARIOS DISPONIBLES -->
+        <div id="tab2" class="content">
+            <div class="alert alert-info">
+                <strong>Horarios de Intensificación:</strong> Visualiza todos los horarios disponibles según el filtro seleccionado.
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <select id="filtroHorarioAnio" onchange="mostrarHorarios()">
+                    <option value="">Todos los años</option>
+                    <option value="1">1er Año</option>
+                    <option value="2">2do Año</option>
+                    <option value="3">3er Año</option>
+                    <option value="4">4to Año</option>
+                    <option value="5">5to Año</option>
+                    <option value="6">6to Año</option>
+                </select>
+                <select id="filtroHorarioTurno" onchange="mostrarHorarios()">
+                    <option value="">Todos los turnos</option>
+                    <option value="Mañana">Mañana</option>
+                    <option value="Tarde">Tarde</option>
+                    <option value="Vespertino">Vespertino</option>
+                </select>
+                <button type="button" class="btn btn-primary" onclick="mostrarHorarios()">Filtrar</button>
+            </div>
+            
+            <div id="listaHorarios">
+                <!-- Los horarios se mostrarán aquí -->
+            </div>
+        </div>
+        
+        <!-- TAB 3: GESTION DE PROFESORES -->
+        <div id="tab3" class="content">
+            <div class="alert alert-info">
+                <strong>Administración de Profesores:</strong> Gestiona los profesores y sus horarios de intensificación.
+            </div>
+            
+            <button type="button" class="btn btn-success" style="margin-bottom: 20px;" onclick="mostrarFormularioProfesor()">+ Agregar Profesor</button>
+            
+            <div id="formProfesor" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                <input type="hidden" id="profIndex" value="-1">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label>Nombre del Profesor</label>
+                        <input type="text" id="nombreProf" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Materia</label>
+                        <input type="text" id="materiaProf" required>
+                    </div>
+                </div>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label>Año</label>
+                        <select id="anioProf">
+                            <option value="1">1°</option>
+                            <option value="2">2°</option>
+                            <option value="3">3°</option>
+                            <option value="4">4°</option>
+                            <option value="5">5°</option>
+                            <option value="6">6°</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Curso</label>
+                        <select id="cursoProf">
+                            <option value="1">1°</option>
+                            <option value="2">2°</option>
+                            <option value="3">3°</option>
+                            <option value="4">4°</option>
+                            <option value="5">5°</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Turno</label>
+                        <select id="turnoProf">
+                            <option value="Mañana">Mañana</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Vespertino">Vespertino</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label>Día</label>
+                        <select id="diaProf">
+                            <option value="Lunes">Lunes</option>
+                            <option value="Martes">Martes</option>
+                            <option value="Miércoles">Miércoles</option>
+                            <option value="Jueves">Jueves</option>
+                            <option value="Viernes">Viernes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Horario</label>
+                        <input type="text" id="horarioProf" placeholder="Ej: 7:20-8:20" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label>Capacidad Máxima</label>
+                    <input type="number" id="capacidadProf" value="15" min="1" max="30">
+                </div>
+                <div style="text-align: right;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('formProfesor').style.display='none'">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="guardarProfesor()">Guardar Profesor</button>
+                </div>
+            </div>
+            
+            <table id="tablaProfesores">
+                <thead>
+                    <tr>
+                        <th>Profesor</th>
+                        <th>Materia</th>
+                        <th>Curso</th>
+                        <th>Cupo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los profesores se mostrarán aquí -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Modal para editar alumno -->
+        <div id="modalEditarAlumno" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+            <div style="background: white; margin: 10% auto; width: 60%; max-width: 600px; border-radius: 8px; overflow: hidden;">
+                <div style="padding: 15px; background: #667eea; color: white;">
+                    <h3>Editar Alumno</h3>
+                    <span onclick="document.getElementById('modalEditarAlumno').style.display='none'" style="float: right; cursor: pointer; font-weight: bold;">&times;</span>
+                </div>
+                <div style="padding: 20px;">
+                    <input type="hidden" id="editDniOriginal">
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>DNI</label>
+                        <input type="text" id="editDni" readonly style="background: #f5f5f5;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label>Nombre y Apellido</label>
+                        <input type="text" id="editNombre">
+                    </div>
+                    <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div class="form-group">
+                            <label>Año</label>
+                            <select id="editAnio">
+                                <option value="1">1°</option>
+                                <option value="2">2°</option>
+                                <option value="3">3°</option>
+                                <option value="4">4°</option>
+                                <option value="5">5°</option>
+                                <option value="6">6°</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Curso</label>
+                            <select id="editCurso">
+                                <option value="1">1°</option>
+                                <option value="2">2°</option>
+                                <option value="3">3°</option>
+                                <option value="4">4°</option>
+                                <option value="5">5°</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="editMateriasContainer"></div>
+                </div>
+                <div style="padding: 15px; background: #f5f5f5; text-align: right;">
+                    <button type="button" class="btn btn-secondary" style="margin-right: 10px;" onclick="document.getElementById('modalEditarAlumno').style.display='none'">Cancelar</button>
+                    <button type="button" class="btn btn-success" onclick="guardarEdicionAlumno()">Guardar Cambios</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let profesores = [];
+        let asignaciones = [];
+        
+        // Materias por año - Esto se actualizará desde el Excel
+        const materiasPorAnio = {
+            "1": ["CIENCIAS NATURALES", "MATEMÁTICA", "LENGUA", "HISTORIA", "GEOGRAFÍA", "ED. FÍSICA", "ED. ARTÍSTICA", "TECNOLOGÍA"],
+            "2": ["CIENCIAS NATURALES", "MATEMÁTICA", "LENGUA", "HISTORIA", "GEOGRAFÍA", "ED. FÍSICA", "ED. ARTÍSTICA", "TECNOLOGÍA"],
+            "3": ["FÍSICO QUÍMICA", "MATEMÁTICA", "LENGUA", "HISTORIA", "GEOGRAFÍA", "ED. FÍSICA", "ED. ARTÍSTICA", "TECNOLOGÍA"],
+            "4": ["FÍSICO QUÍMICA", "MATEMÁTICA CICLO SUPERIOR", "LENGUA", "HISTORIA", "GEOGRAFÍA", "ED. FÍSICA", "ED. ARTÍSTICA", "TECNOLOGÍA", "FILOSOFÍA"],
+            "5": ["FÍSICO QUÍMICA", "MATEMÁTICA CICLO SUPERIOR", "LENGUA", "HISTORIA", "GEOGRAFÍA", "ED. FÍSICA", "ED. ARTÍSTICA", "TECNOLOGÍA", "FILOSOFÍA", "ECONOMÍA POLÍTICA"],
+            "6": ["FÍSICO QUÍMICA", "MATEMÁTICA CICLO SUPERIOR", "LENGUA", "HISTORIA", "GEOGRAFÍA", "ED. FÍSICA", "ED. ARTÍSTICA", "TECNOLOGÍA", "FILOSOFÍA", "ECONOMÍA POLÍTICA", "FILO. E HISTORIA DE LA CIEN. Y TEC."]
+        };
+
+        // ==================== MANEJO DEL EXCEL ====================
+        document.getElementById('excelFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const fileName = document.getElementById('fileName');
+            const excelStatus = document.getElementById('excelStatus');
+            const excelPreview = document.getElementById('excelPreview');
+            
+            fileName.textContent = file.name;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    // Intentamos encontrar la hoja correcta (asumiendo que es la primera)
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    // Convertimos a JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    if (jsonData.length === 0) {
+                        excelStatus.className = 'excel-status error';
+                        excelStatus.textContent = 'El archivo Excel está vacío. Por favor, selecciona un archivo válido.';
+                        return;
+                    }
+                    
+                    // Procesamos los datos
+                    procesarDatosExcel(jsonData);
+                    
+                    // Mostramos una vista previa
+                    mostrarVistaPrevia(jsonData);
+                    
+                    excelStatus.className = 'excel-status success';
+                    excelStatus.textContent = `¡Archivo cargado exitosamente! ${profesores.length} profesores procesados.`;
+                    excelPreview.style.display = 'block';
+                    
+                } catch (error) {
+                    excelStatus.className = 'excel-status error';
+                    excelStatus.textContent = `Error al procesar el archivo: ${error.message}`;
+                    console.error(error);
+                }
+            };
+            
+            reader.onerror = function(error) {
+                excelStatus.className = 'excel-status error';
+                excelStatus.textContent = 'Error al leer el archivo. Por favor, intenta con otro archivo.';
+            };
+            
+            reader.readAsArrayBuffer(file);
+        });
+        
+        function procesarDatosExcel(jsonData) {
+            // Reiniciamos los profesores
+            profesores = [];
+            
+            // Asumiendo que la estructura del Excel es:
+            // Columnas: Profesor | Materia | Año | Curso | Turno | Día | Horario | Capacidad
+            
+            // Encontramos los índices de las columnas (asumiendo que la primera fila tiene encabezados)
+            const headers = jsonData[0];
+            const indexProfesor = headers.findIndex(h => /profesor|docente/i.test(String(h).toLowerCase()));
+            const indexMateria = headers.findIndex(h => /materia|asignatura/i.test(String(h).toLowerCase()));
+            const indexAnio = headers.findIndex(h => /año|grado/i.test(String(h).toLowerCase()));
+            const indexCurso = headers.findIndex(h => /curso|division/i.test(String(h).toLowerCase()));
+            const indexTurno = headers.findIndex(h => /turno/i.test(String(h).toLowerCase()));
+            const indexDia = headers.findIndex(h => /día|dia/i.test(String(h).toLowerCase()));
+            const indexHorario = headers.findIndex(h => /horario|hora/i.test(String(h).toLowerCase()));
+            const indexCapacidad = headers.findIndex(h => /capacidad|cupo/i.test(String(h).toLowerCase()));
+            
+            // Si no encontramos algunos índices, usamos valores por defecto
+            if (indexProfesor === -1 || indexMateria === -1 || indexAnio === -1 || indexDia === -1 || indexHorario === -1) {
+                throw new Error("El formato del Excel no es compatible. Se necesitan las columnas: Profesor, Materia, Año, Día, Horario");
+            }
+            
+            // Procesamos cada fila de datos (empezando desde la fila 1, saltándonos los encabezados)
+            for (let i = 1; i < jsonData.length; i++) {
+                const row = jsonData[i];
+                if (!row || row.length === 0) continue;
+                
+                // Extraemos los datos
+                const nombre = row[indexProfesor] || '';
+                const materia = row[indexMateria] || '';
+                const anio = String(row[indexAnio] || '').replace(/°/g, '').trim();
+                const curso = String(row[indexCurso] || '1').replace(/°/g, '').trim();
+                const turno = row[indexTurno] || 'Mañana';
+                const dia = row[indexDia] || '';
+                const horario = row[indexHorario] || '';
+                const capacidad = row[indexCapacidad] || 15;
+                
+                // Validamos que los datos mínimos estén presentes
+                if (!nombre || !materia || !anio || !dia || !horario) continue;
+                
+                // Creamos el objeto profesor
+                profesores.push({
+                    id: Date.now() + Math.random(),
+                    nombre: String(nombre).trim(),
+                    materia: String(materia).trim().toUpperCase(),
+                    anio: String(anio).trim(),
+                    curso: String(curso).trim(),
+                    turno: String(turno).trim(),
+                    dia: String(dia).trim(),
+                    horario: String(horario).trim(),
+                    capacidad: parseInt(capacidad) || 15,
+                    asignados: 0
+                });
+            }
+            
+            // Actualizamos las materias por año basado en los datos del Excel
+            actualizarMateriasDesdeExcel();
+            
+            // Guardamos en localStorage
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            
+            // Actualizamos la interfaz
+            actualizarStats();
+            if (document.querySelector('.content.active') === document.getElementById('tab0')) {
+                actualizarMateriasDisponibles();
+            }
+            if (document.querySelector('.content.active') === document.getElementById('tab2')) {
+                mostrarHorarios();
+            }
+            if (document.querySelector('.content.active') === document.getElementById('tab3')) {
+                mostrarProfesores();
+            }
+        }
+        
+        function actualizarMateriasDesdeExcel() {
+            // Reiniciamos las materias por año
+            for (let i = 1; i <= 6; i++) {
+                materiasPorAnio[i] = [];
+            }
+            
+            // Extraemos las materias únicas por año desde los datos del Excel
+            profesores.forEach(profesor => {
+                const anio = profesor.anio;
+                const materia = profesor.materia;
+                
+                if (anio && materia && !materiasPorAnio[anio].includes(materia)) {
+                    materiasPorAnio[anio].push(materia);
+                }
+            });
+            
+            // Ordenamos alfabéticamente
+            for (let i = 1; i <= 6; i++) {
+                materiasPorAnio[i].sort();
+            }
+        }
+        
+        function mostrarVistaPrevia(jsonData) {
+            const previewTable = document.getElementById('previewTable').querySelector('tbody');
+            previewTable.innerHTML = '';
+            
+            // Mostramos las primeras 5 filas
+            const numRows = Math.min(5, jsonData.length > 1 ? jsonData.length - 1 : 0);
+            
+            for (let i = 0; i < numRows; i++) {
+                const rowIndex = i + 1; // Saltamos los encabezados
+                if (rowIndex >= jsonData.length) break;
+                
+                const row = jsonData[rowIndex];
+                if (!row || row.length === 0) continue;
+                
+                const tr = document.createElement('tr');
+                
+                // Asumimos un orden estándar de columnas
+                tr.innerHTML = `
+                    <td>${row[0] || ''}</td>
+                    <td>${row[1] || ''}</td>
+                    <td>${row[2] || ''}</td>
+                    <td>${row[3] || ''}</td>
+                    <td>${row[4] || ''}</td>
+                    <td>${row[5] || ''}</td>
+                    <td>${row[6] || ''}</td>
+                `;
+                
+                previewTable.appendChild(tr);
+            }
+            
+            // Si no hay datos, mostramos un mensaje
+            if (numRows === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="7" style="text-align: center;">No se encontraron datos en el archivo</td>`;
+                previewTable.appendChild(tr);
+            }
+        }
+
+        // ==================== FUNCIONES PRINCIPALES ====================
+        function cambiarTab(index) {
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+            
+            if(index === 0) {
+                actualizarStats();
+                actualizarMateriasDisponibles();
+            }
+            if(index === 1) mostrarAlumnos();
+            if(index === 2) mostrarHorarios();
+            if(index === 3) mostrarProfesores();
+        }
+        
+        function actualizarStats() {
+            document.getElementById('statTotalAlumnos').textContent = new Set(asignaciones.map(a => a.dni)).size;
+            document.getElementById('statTotalProfes').textContent = profesores.length;
+            document.getElementById('statTotalCursos').textContent = new Set(profesores.map(p => `${p.anio}°${p.curso}`)).size;
+        }
+        
+        function actualizarMateriasDisponibles() {
+            const anio = document.getElementById('anioAlumno').value;
+            const turno = document.getElementById('turnoAlumno').value;
+            const container = document.getElementById('materiasContainer');
+            const debugDiv = document.getElementById('debugInfo');
+            
+            if(!anio || !turno) {
+                container.innerHTML = '<p style="color: #666;">Primero selecciona año y turno...</p>';
+                debugDiv.style.display = 'none';
+                return;
+            }
+            
+            // Debug info
+            let debugText = `<strong>Debug:</strong> Año seleccionado: ${anio}, Turno: ${turno}<br>`;
+            debugText += `Total profesores cargados: ${profesores.length}<br>`;
+            
+            const materias = materiasPorAnio[anio] || [];
+            debugText += `Materias para este año: ${materias.join(', ')}<br>`;
+            
+            // Contar profesores por materia para este año y turno
+            const conteoPorMateria = {};
+            materias.forEach(m => {
+                const count = profesores.filter(p => {
+                    const matchMateria = p.materia.toUpperCase() === m.toUpperCase();
+                    const matchAnio = String(p.anio) === String(anio);
+                    const matchTurno = p.turno === turno;
+                    return matchMateria && matchAnio && matchTurno;
+                }).length;
+                conteoPorMateria[m] = count;
+            });
+            
+            debugText += `Profesores por materia: ${JSON.stringify(conteoPorMateria)}`;
+            debugDiv.innerHTML = debugText;
+            debugDiv.style.display = 'block';
+            
+            let html = '';
+            if (materias.length === 0) {
+                html = '<div class="alert alert-warning">No hay materias definidas para este año.</div>';
+                container.innerHTML = html;
+                return;
+            }
+            
+            materias.forEach(materia => {
+                // Buscar profesores disponibles para esta materia, año y turno
+                const profesDisponibles = profesores.filter(p => {
+                    const matchMateria = p.materia.toUpperCase() === materia.toUpperCase();
+                    const matchAnio = String(p.anio) === String(anio);
+                    const matchTurno = p.turno === turno;
+                    const tieneCupo = (p.asignados || 0) < p.capacidad;
+                    return matchMateria && matchAnio && matchTurno && tieneCupo;
+                }).sort((a, b) => (a.asignados || 0) - (b.asignados || 0));
+                
+                html += `<div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 5px; border-left: 4px solid #667eea;">`;
+                html += `<label style="display: flex; align-items: center; cursor: pointer;">`;
+                html += `<input type="checkbox" name="materiaPrevia" value="${materia}" style="width: auto; margin-right: 10px;" onchange="toggleSugerencia(this)">`;
+                html += `<span><strong>${materia}</strong></span>`;
+                html += `</label>`;
+                
+                if(profesDisponibles.length > 0) {
+                    const safeMateria = materia.replace(/\s+/g, '-').replace(/\./g, '');
+                    html += `<div class="sugerencias-${safeMateria}" style="margin-top: 10px; padding-left: 25px; display: none;">`;
+                    html += `<small style="color: #666;">Docentes disponibles (ordenados por carga):</small>`;
+                    
+                    profesDisponibles.forEach((p, i) => {
+                        const cupoClass = (p.asignados || 0) >= p.capacidad ? 'cupo-lleno' :
+                                        (p.asignados || 0) >= p.capacidad * 0.7 ? 'cupo-medio' : 'cupo-disponible';
+                        const turnoClass = p.turno === 'Mañana' ? 'turno-mañana' :
+                                         p.turno === 'Tarde' ? 'turno-tarde' : 'turno-vespertino';
+                        
+                        html += `<div style="padding: 5px; margin: 3px 0; background: #f8f9fa; border-radius: 3px; font-size: 12px;">`;
+                        html += `<span class="${cupoClass}">${i+1}. ${p.nombre} - ${p.dia} ${p.horario} (Curso ${p.curso}°)</span>`;
+                        html += ` <span class="turno-tag ${turnoClass}">${p.turno}</span>`;
+                        html += ` <span style="color: #666;">(${(p.asignados || 0)}/${p.capacidad} alumnos)</span>`;
+                        if(i === 0) html += ' <span style="color: #28a745; font-weight: bold;">⭐ RECOMENDADO</span>';
+                        html += `</div>`;
+                    });
+                    html += `</div>`;
+                } else {
+                    html += `<div class="no-docentes-msg">❌ No hay docentes disponibles para esta materia en tu turno</div>`;
+                }
+                html += `</div>`;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function toggleSugerencia(checkbox) {
+            const materia = checkbox.value.replace(/\s+/g, '-').replace(/\./g, '');
+            const sugerencias = document.querySelector(`.sugerencias-${materia}`);
+            if(sugerencias) {
+                sugerencias.style.display = checkbox.checked ? 'block' : 'none';
+            }
+        }
+        
+        function asignarAlumno() {
+            const dni = document.getElementById('dniA').value.trim();
+            const nombre = document.getElementById('nombreA').value.trim();
+            const anioAlumno = document.getElementById('anioAlumno').value;
+            const turnoAlumno = document.getElementById('turnoAlumno').value;
+            
+            if(!dni || !nombre || !anioAlumno || !turnoAlumno) {
+                alert('Por favor, completa todos los campos obligatorios');
+                return;
+            }
+            
+            // Verificar si el alumno ya está registrado
+            const alumnoExistente = asignaciones.some(a => a.dni === dni);
+            if(alumnoExistente) {
+                if(!confirm('Este DNI ya está registrado. ¿Deseas agregar más materias a este alumno?')) {
+                    return;
+                }
+            }
+            
+            const checkboxes = document.querySelectorAll('input[name="materiaPrevia"]:checked');
+            if(checkboxes.length === 0) {
+                alert('Por favor, selecciona al menos una materia');
+                return;
+            }
+            
+            const resultados = [];
+            const asignacionesNuevas = [];
+            
+            checkboxes.forEach(checkbox => {
+                const materia = checkbox.value;
+                
+                // Buscar profesores disponibles para esta materia, año y turno
+                const profesDisponibles = profesores.filter(p => {
+                    const matchMateria = p.materia.toUpperCase() === materia.toUpperCase();
+                    const matchAnio = String(p.anio) === String(anioAlumno);
+                    const matchTurno = p.turno === turnoAlumno;
+                    const tieneCupo = (p.asignados || 0) < p.capacidad;
+                    return matchMateria && matchAnio && matchTurno && tieneCupo;
+                }).sort((a, b) => (a.asignados || 0) - (b.asignados || 0));
+                
+                if(profesDisponibles.length === 0) {
+                    resultados.push(`⚠️ ${materia}: No hay docentes disponibles`);
+                    return;
+                }
+                
+                // Tomamos el primer profesor disponible (menor carga)
+                const elegido = profesDisponibles[0];
+                
+                // Creamos un ID único para esta asignación
+                const idAsignacion = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                
+                // Actualizamos el contador de alumnos del profesor
+                const profesorIndex = profesores.findIndex(p => p.id === elegido.id);
+                if (profesorIndex !== -1) {
+                    profesores[profesorIndex].asignados = (profesores[profesorIndex].asignados || 0) + 1;
+                }
+                
+                // Guardamos la asignación
+                asignacionesNuevas.push({
+                    id: idAsignacion,
+                    dni,
+                    nombre,
+                    anioAlumno,
+                    turnoAlumno,
+                    materia: materia,
+                    profesor: elegido.nombre,
+                    profesorIndex: profesorIndex,
+                    dia: elegido.dia,
+                    horario: elegido.horario,
+                    turno: elegido.turno
+                });
+                
+                resultados.push(`✅ ${materia}: ${elegido.nombre} (${elegido.dia} ${elegido.horario}) - ${(elegido.asignados || 0) + 1}/${elegido.capacidad} alumnos`);
+            });
+            
+            asignaciones.push(...asignacionesNuevas);
+            
+            // Guardar en localStorage
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            localStorage.setItem('asignaciones', JSON.stringify(asignaciones));
+            
+            document.getElementById('resultado').innerHTML = 
+                `<div class="alert alert-success"><strong>Asignación completada para ${nombre}</strong></div>` +
+                resultados.map(r => `<div style="padding: 5px 0;">${r}</div>`).join('');
+            
+            actualizarStats();
+            actualizarMateriasDisponibles();
+            document.getElementById('formAlumno').reset();
+        }
+        
+        // ==================== GESTION DE ALUMNOS ====================
+        function mostrarAlumnos() {
+            const filtroDNI = document.getElementById('filtroDNI').value.toLowerCase();
+            const filtroNombre = document.getElementById('filtroNombre').value.toLowerCase();
+            const filtroAnio = document.getElementById('filtroAnio').value;
+            
+            if(asignaciones.length === 0) {
+                document.getElementById('listaAlumnos').innerHTML = '<div class="alert alert-info">No hay alumnos asignados aún.</div>';
+                return;
+            }
+            
+            // Agrupar por alumno
+            const alumnosPorDNI = {};
+            asignaciones.forEach(a => {
+                if(!alumnosPorDNI[a.dni]) {
+                    alumnosPorDNI[a.dni] = {
+                        nombre: a.nombre,
+                        anio: a.anioAlumno,
+                        curso: '1', // Podrías mejorar esto con datos reales
+                        turnos: []
+                    };
+                }
+                alumnosPorDNI[a.dni].turnos.push(a);
+            });
+            
+            // Aplicar filtros
+            let alumnosFiltrados = Object.entries(alumnosPorDNI).filter(([dni, alumno]) => {
+                if(filtroDNI && !dni.includes(filtroDNI)) return false;
+                if(filtroNombre && !alumno.nombre.toLowerCase().includes(filtroNombre)) return false;
+                if(filtroAnio && String(alumno.anio) !== String(filtroAnio)) return false;
+                return true;
+            });
+            
+            if(alumnosFiltrados.length === 0) {
+                document.getElementById('listaAlumnos').innerHTML = '<div class="alert alert-warning">No se encontraron alumnos con los filtros aplicados.</div>';
+                return;
+            }
+            
+            let html = '';
+            alumnosFiltrados.forEach(([dni, alumno]) => {
+                html += `<div class="alumno-card">`;
+                html += `<div class="alumno-header">`;
+                html += `<div><h3>${alumno.nombre}</h3><p>DNI: ${dni} | ${alumno.anio}° ${alumno.curso}</p></div>`;
+                html += `<div><button class="btn btn-warning" onclick="editarAlumno('${dni}')">Editar</button> `;
+                html += `<button class="btn btn-danger" onclick="eliminarAlumno('${dni}')">Eliminar</button></div>`;
+                html += `</div>`;
+                
+                html += '<table style="margin-top: 10px;"><thead><tr><th>Materia</th><th>Profesor</th><th>Día</th><th>Horario</th><th>Turno</th><th>Acción</th></tr></thead><tbody>';
+                
+                alumno.turnos.forEach(t => {
+                    const turnoClass = t.turno === 'Mañana' ? 'turno-mañana' :
+                                    t.turno === 'Tarde' ? 'turno-tarde' : 'turno-vespertino';
+                    
+                    html += `<tr>
+                        <td>${t.materia}</td>
+                        <td>${t.profesor}</td>
+                        <td>${t.dia}</td>
+                        <td>${t.horario}</td>
+                        <td><span class="turno-tag ${turnoClass}">${t.turno}</span></td>
+                        <td><button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="eliminarAsignacion('${t.id}')">Quitar</button></td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table></div>';
+            });
+            
+            document.getElementById('listaAlumnos').innerHTML = html;
+        }
+        
+        function filtrarAlumnos() {
+            mostrarAlumnos();
+        }
+        
+        function eliminarAlumno(dni) {
+            if(!confirm('¿Estás seguro de eliminar a este alumno y todas sus asignaciones?')) return;
+            
+            // Actualizar los contadores de profesores
+            const asignacionesAlumno = asignaciones.filter(a => a.dni === dni);
+            asignacionesAlumno.forEach(a => {
+                if (a.profesorIndex !== undefined && profesores[a.profesorIndex]) {
+                    profesores[a.profesorIndex].asignados = Math.max(0, (profesores[a.profesorIndex].asignados || 0) - 1);
+                }
+            });
+            
+            // Eliminar asignaciones del alumno
+            asignaciones = asignaciones.filter(a => a.dni !== dni);
+            
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            localStorage.setItem('asignaciones', JSON.stringify(asignaciones));
+            
+            mostrarAlumnos();
+            actualizarStats();
+        }
+        
+        function eliminarAsignacion(id) {
+            if(!confirm('¿Estás seguro de eliminar esta asignación?')) return;
+            
+            const asignacion = asignaciones.find(a => a.id == id);
+            if(asignacion && asignacion.profesorIndex !== undefined && profesores[asignacion.profesorIndex]) {
+                profesores[asignacion.profesorIndex].asignados = Math.max(0, (profesores[asignacion.profesorIndex].asignados || 0) - 1);
+            }
+            
+            asignaciones = asignaciones.filter(a => a.id != id);
+            
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            localStorage.setItem('asignaciones', JSON.stringify(asignaciones));
+            
+            mostrarAlumnos();
+            actualizarStats();
+        }
+        
+        function editarAlumno(dni) {
+            const asignacionesAlumno = asignaciones.filter(a => a.dni === dni);
+            if(asignacionesAlumno.length === 0) return;
+            
+            const alumno = asignacionesAlumno[0];
+            document.getElementById('editDniOriginal').value = dni;
+            document.getElementById('editDni').value = dni;
+            document.getElementById('editNombre').value = alumno.nombre;
+            document.getElementById('editAnio').value = alumno.anioAlumno;
+            document.getElementById('editCurso').value = alumno.curso || '1';
+            
+            // Mostrar materias actuales
+            let html = '<h4>Materias asignadas:</h4>';
+            asignacionesAlumno.forEach(a => {
+                html += `<div style="padding: 10px; background: #f8f9fa; margin: 5px 0; border-radius: 5px;">`;
+                html += `<strong>${a.materia}</strong> - ${a.profesor} (${a.dia} ${a.horario})`;
+                html += `</div>`;
+            });
+            
+            document.getElementById('editMateriasContainer').innerHTML = html;
+            document.getElementById('modalEditarAlumno').style.display = 'block';
+        }
+        
+        function guardarEdicionAlumno() {
+            const dniOriginal = document.getElementById('editDniOriginal').value;
+            const nuevoDni = document.getElementById('editDni').value.trim();
+            const nuevoNombre = document.getElementById('editNombre').value.trim();
+            const nuevoAnio = document.getElementById('editAnio').value;
+            const nuevoCurso = document.getElementById('editCurso').value;
+            
+            if(!nuevoDni || !nuevoNombre || !nuevoAnio) {
+                alert('Por favor, completa todos los campos obligatorios');
+                return;
+            }
+            
+            // Actualizar las asignaciones
+            asignaciones = asignaciones.map(a => {
+                if (a.dni === dniOriginal) {
+                    return {
+                        ...a,
+                        dni: nuevoDni,
+                        nombre: nuevoNombre,
+                        anioAlumno: nuevoAnio,
+                        cursoAlumno: nuevoCurso
+                    };
+                }
+                return a;
+            });
+            
+            localStorage.setItem('asignaciones', JSON.stringify(asignaciones));
+            
+            // Cerrar el modal
+            document.getElementById('modalEditarAlumno').style.display = 'none';
+            
+            // Actualizar la vista
+            mostrarAlumnos();
+        }
+        
+        // ==================== HORARIOS DISPONIBLES ====================
+        function mostrarHorarios() {
+            const filtroAnio = document.getElementById('filtroHorarioAnio').value;
+            const filtroTurno = document.getElementById('filtroHorarioTurno').value;
+            
+            // Filtrar profesores
+            let profs = [...profesores];
+            if(filtroAnio) {
+                profs = profs.filter(p => String(p.anio) === String(filtroAnio));
+            }
+            if(filtroTurno) {
+                profs = profs.filter(p => p.turno === filtroTurno);
+            }
+            
+            if(profs.length === 0) {
+                document.getElementById('listaHorarios').innerHTML = '<div class="alert alert-info">No hay horarios con los filtros aplicados.</div>';
+                return;
+            }
+            
+            let html = '<table><thead><tr><th>Profesor</th><th>Materia</th><th>Curso</th><th>Día</th><th>Horario</th><th>Turno</th><th>Cupo</th></tr></thead><tbody>';
+            
+            profs.forEach(p => {
+                const asignados = p.asignados || 0;
+                const cupoClass = asignados >= p.capacidad ? 'cupo-lleno' :
+                               asignados >= p.capacidad * 0.7 ? 'cupo-medio' : 'cupo-disponible';
+                const turnoClass = p.turno === 'Mañana' ? 'turno-mañana' :
+                                 p.turno === 'Tarde' ? 'turno-tarde' : 'turno-vespertino';
+                
+                html += `<tr>
+                    <td>${p.nombre}</td>
+                    <td>${p.materia}</td>
+                    <td>${p.anio}°${p.curso}</td>
+                    <td>${p.dia}</td>
+                    <td>${p.horario}</td>
+                    <td><span class="turno-tag ${turnoClass}">${p.turno}</span></td>
+                    <td class="${cupoClass}">${asignados}/${p.capacidad}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('listaHorarios').innerHTML = html;
+        }
+        
+        function filtrarHorarios() {
+            mostrarHorarios();
+        }
+        
+        // ==================== GESTION DE PROFESORES ====================
+        function mostrarProfesores() {
+            const tbody = document.querySelector('#tablaProfesores tbody');
+            if(profesores.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay profesores cargados</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            profesores.forEach((p, index) => {
+                const asignados = p.asignados || 0;
+                const cupoClass = asignados >= p.capacidad ? 'cupo-lleno' :
+                               asignados >= p.capacidad * 0.7 ? 'cupo-medio' : 'cupo-disponible';
+                
+                html += `<tr>
+                    <td>${p.nombre}</td>
+                    <td>${p.materia}</td>
+                    <td>${p.anio}°${p.curso}</td>
+                    <td class="${cupoClass}">${asignados}/${p.capacidad}</td>
+                    <td>
+                        <button class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;" onclick="editarProfesor(${index})">Editar</button>
+                        <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="eliminarProfesor(${index})">Eliminar</button>
+                    </td>
+                </tr>`;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        function mostrarFormularioProfesor(index = -1) {
+            document.getElementById('profIndex').value = index;
+            
+            if(index >= 0) {
+                const p = profesores[index];
+                document.getElementById('nombreProf').value = p.nombre;
+                document.getElementById('materiaProf').value = p.materia;
+                document.getElementById('anioProf').value = p.anio;
+                document.getElementById('cursoProf').value = p.curso;
+                document.getElementById('turnoProf').value = p.turno;
+                document.getElementById('diaProf').value = p.dia;
+                document.getElementById('horarioProf').value = p.horario;
+                document.getElementById('capacidadProf').value = p.capacidad;
+            } else {
+                document.getElementById('formProfesor').reset();
+            }
+            
+            document.getElementById('formProfesor').style.display = 'block';
+        }
+        
+        function guardarProfesor() {
+            const index = parseInt(document.getElementById('profIndex').value);
+            const nombre = document.getElementById('nombreProf').value.trim();
+            const materia = document.getElementById('materiaProf').value.trim();
+            const anio = document.getElementById('anioProf').value;
+            const curso = document.getElementById('cursoProf').value;
+            const turno = document.getElementById('turnoProf').value;
+            const dia = document.getElementById('diaProf').value;
+            const horario = document.getElementById('horarioProf').value.trim();
+            const capacidad = parseInt(document.getElementById('capacidadProf').value) || 15;
+            
+            if(!nombre || !materia || !anio || !dia || !horario) {
+                alert('Por favor, completa todos los campos obligatorios');
+                return;
+            }
+            
+            const profesor = {
+                id: index >= 0 ? profesores[index].id : Date.now() + Math.random(),
+                nombre,
+                materia: materia.toUpperCase(),
+                anio,
+                curso,
+                turno,
+                dia,
+                horario,
+                capacidad,
+                asignados: index >= 0 ? profesores[index].asignados || 0 : 0
+            };
+            
+            if(index >= 0) {
+                profesores[index] = profesor;
+            } else {
+                profesores.push(profesor);
+            }
+            
+            // Actualizamos las materias por año
+            if (!materiasPorAnio[anio].includes(materia.toUpperCase())) {
+                materiasPorAnio[anio].push(materia.toUpperCase());
+                materiasPorAnio[anio].sort();
+            }
+            
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            document.getElementById('formProfesor').style.display = 'none';
+            mostrarProfesores();
+            actualizarStats();
+        }
+        
+        function editarProfesor(index) {
+            mostrarFormularioProfesor(index);
+        }
+        
+        function eliminarProfesor(index) {
+            if(!confirm('¿Estás seguro de eliminar este profesor?')) return;
+            
+            // Si el profesor tiene alumnos asignados
+            if ((profesores[index].asignados || 0) > 0) {
+                if(!confirm('Este profesor tiene alumnos asignados. ¿Estás seguro de eliminarlo? Esto podría afectar las asignaciones de los alumnos.')) {
+                    return;
+                }
+            }
+            
+            profesores.splice(index, 1);
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            mostrarProfesores();
+            actualizarStats();
+        }
+        
+        // ==================== DATOS PRECARGADOS ====================
+        function cargarDatosPrecargados() {
+            // Esta función ahora se usa solo como fallback
+            const datosPrecargados = [
+                // TURNO MAÑANA
+                {nombre: 'BAIO CLAUDIA', materia: 'CIENCIAS NATURALES', anio: '1', curso: '1', turno: 'Mañana', dia: 'Lunes', horario: '7:20-8:20', capacidad: 15, asignados: 0},
+                {nombre: 'BAIO CLAUDIA', materia: 'CIENCIAS NATURALES', anio: '1', curso: '1', turno: 'Mañana', dia: 'Martes', horario: '7:20-8:20', capacidad: 15, asignados: 0},
+                // Agrega más datos de ejemplo según sea necesario
+            ];
+            
+            profesores = datosPrecargados;
+            localStorage.setItem('profesores', JSON.stringify(profesores));
+            console.log('Datos precargados cargados como fallback:', profesores.length, 'profesores');
+            
+            // Actualizamos las materias por año
+            actualizarMateriasDesdeExcel();
+            
+            // Actualizamos la interfaz
+            actualizarStats();
+            if (document.querySelector('.content.active') === document.getElementById('tab0')) {
+                actualizarMateriasDisponibles();
+            }
+            if (document.querySelector('.content.active') === document.getElementById('tab2')) {
+                mostrarHorarios();
+            }
+            if (document.querySelector('.content.active') === document.getElementById('tab3')) {
+                mostrarProfesores();
+            }
+        }
+        
+        function recargarDatosPrecargados() {
+            if(confirm('¿Estás seguro? Se reemplazarán todos los profesores con los datos de las planillas y se perderán las asignaciones actuales.')) {
+                cargarDatosPrecargados();
+                document.getElementById('excelStatus').className = 'excel-status success';
+                document.getElementById('excelStatus').textContent = 'Datos precargados cargados exitosamente.';
+                document.getElementById('excelPreview').style.display = 'none';
+            }
+        }
+        
+        function limpiarTodo() {
+            if(confirm('¿Estás seguro de limpiar todos los datos? Esta acción no se puede deshacer.')) {
+                profesores = [];
+                asignaciones = [];
+                localStorage.removeItem('profesores');
+                localStorage.removeItem('asignaciones');
+                
+                // Restablecer los datos iniciales
+                actualizarStats();
+                actualizarMateriasDisponibles();
+                
+                document.getElementById('excelStatus').className = 'excel-status success';
+                document.getElementById('excelStatus').textContent = 'Todos los datos han sido eliminados.';
+                document.getElementById('excelPreview').style.display = 'none';
+                document.getElementById('fileName').textContent = 'Ningún archivo seleccionado';
+            }
+        }
+        
+        // Cargar datos al inicio
+        window.onload = function() {
+            const profGuardados = localStorage.getItem('profesores');
+            const asigGuardadas = localStorage.getItem('asignaciones');
+            
+            if(profGuardados) {
+                profesores = JSON.parse(profGuardados);
+            } else {
+                // Intentamos cargar los datos del Excel si existe
+                const excelFile = localStorage.getItem('excelData');
+                if (excelFile) {
+                    try {
+                        const jsonData = JSON.parse(excelFile);
+                        procesarDatosExcel(jsonData);
+                    } catch (e) {
+                        cargarDatosPrecargados();
+                    }
+                } else {
+                    cargarDatosPrecargados();
+                }
+            }
+            
+            if(asigGuardadas) {
+                asignaciones = JSON.parse(asigGuardadas);
+            }
+            
+            // Inicializar asignados
+            profesores = profesores.map(p => ({
+                ...p,
+                asignados: p.asignados || 0
+            }));
+            
+            actualizarStats();
+            actualizarMateriasDisponibles();
+        };
+    </script>
+</body>
+</html>
